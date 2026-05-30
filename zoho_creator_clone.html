@@ -1,0 +1,1159 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Zoho Creator - Prototipo Empresarial</title>
+  <style>
+    :root {
+      --bg: #f6f8fb;
+      --panel: #ffffff;
+      --sidebar: #0f172a;
+      --sidebar-soft: #1e293b;
+      --text: #172033;
+      --muted: #64748b;
+      --line: #e2e8f0;
+      --primary: #246bfe;
+      --primary-dark: #1556d8;
+      --success: #0f9f6e;
+      --warning: #d97706;
+      --danger: #dc2626;
+      --radius: 18px;
+      --shadow: 0 16px 38px rgba(15, 23, 42, 0.08);
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      min-height: 100vh;
+      background: var(--bg);
+      color: var(--text);
+      font-family: "Segoe UI Variable", "Segoe UI", Inter, system-ui, -apple-system, BlinkMacSystemFont, sans-serif;
+      letter-spacing: -0.01em;
+    }
+
+    button, input, select, textarea {
+      font-family: inherit;
+    }
+
+    .workspace {
+      display: grid;
+      grid-template-columns: 264px 1fr;
+      min-height: 100vh;
+    }
+
+    .sidebar {
+      background: linear-gradient(180deg, #0f172a 0%, #111827 100%);
+      color: white;
+      padding: 24px 18px;
+      position: sticky;
+      top: 0;
+      height: 100vh;
+    }
+
+    .brand {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding: 0 6px 26px;
+      border-bottom: 1px solid rgba(255,255,255,0.08);
+      margin-bottom: 22px;
+    }
+
+    .brand-mark {
+      width: 42px;
+      height: 42px;
+      border-radius: 14px;
+      display: grid;
+      place-items: center;
+      background: #ffffff;
+      color: var(--primary);
+      box-shadow: 0 12px 24px rgba(0,0,0,0.18);
+    }
+
+    .brand-title {
+      font-size: 16px;
+      font-weight: 760;
+      line-height: 1.1;
+    }
+
+    .brand-subtitle {
+      color: #94a3b8;
+      font-size: 12px;
+      margin-top: 3px;
+    }
+
+    .nav-section {
+      color: #94a3b8;
+      font-size: 11px;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      padding: 14px 10px 8px;
+    }
+
+    .nav-button {
+      width: 100%;
+      border: 0;
+      background: transparent;
+      color: #cbd5e1;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding: 12px 12px;
+      border-radius: 13px;
+      cursor: pointer;
+      margin-bottom: 5px;
+      font-size: 14px;
+      transition: 0.18s ease;
+    }
+
+    .nav-button svg {
+      width: 19px;
+      height: 19px;
+      stroke-width: 1.9;
+      opacity: .95;
+    }
+
+    .nav-button:hover,
+    .nav-button.active {
+      background: rgba(36, 107, 254, 0.18);
+      color: white;
+    }
+
+    .nav-button.active {
+      box-shadow: inset 3px 0 0 var(--primary);
+    }
+
+    .main {
+      padding: 24px;
+    }
+
+    .header {
+      background: var(--panel);
+      border-radius: 22px;
+      padding: 22px 24px;
+      box-shadow: var(--shadow);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 20px;
+      margin-bottom: 22px;
+    }
+
+    .eyebrow {
+      color: var(--primary);
+      font-size: 12px;
+      font-weight: 760;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      margin-bottom: 8px;
+    }
+
+    .header h1 {
+      font-size: 27px;
+      font-weight: 780;
+      margin-bottom: 6px;
+    }
+
+    .header p {
+      color: var(--muted);
+      font-size: 14px;
+      max-width: 690px;
+      line-height: 1.55;
+    }
+
+    .actions {
+      display: flex;
+      gap: 10px;
+      flex-wrap: wrap;
+      justify-content: flex-end;
+    }
+
+    .btn {
+      border: 0;
+      border-radius: 13px;
+      padding: 11px 15px;
+      font-weight: 700;
+      font-size: 13px;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      transition: .18s ease;
+      white-space: nowrap;
+    }
+
+    .btn svg {
+      width: 17px;
+      height: 17px;
+    }
+
+    .btn-primary {
+      background: var(--primary);
+      color: white;
+    }
+
+    .btn-primary:hover {
+      background: var(--primary-dark);
+      transform: translateY(-1px);
+    }
+
+    .btn-light {
+      background: #eef2ff;
+      color: #1e3a8a;
+    }
+
+    .btn-light:hover {
+      background: #dbeafe;
+    }
+
+    .metrics {
+      display: grid;
+      grid-template-columns: repeat(4, minmax(0, 1fr));
+      gap: 16px;
+      margin-bottom: 22px;
+    }
+
+    .metric {
+      background: var(--panel);
+      border-radius: var(--radius);
+      padding: 18px;
+      box-shadow: var(--shadow);
+      border: 1px solid rgba(226,232,240,.75);
+    }
+
+    .metric-head {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 12px;
+    }
+
+    .metric-label {
+      color: var(--muted);
+      font-size: 13px;
+      font-weight: 650;
+    }
+
+    .metric-icon {
+      width: 36px;
+      height: 36px;
+      border-radius: 12px;
+      background: #f1f5f9;
+      display: grid;
+      place-items: center;
+      color: var(--primary);
+    }
+
+    .metric-icon svg {
+      width: 19px;
+      height: 19px;
+    }
+
+    .metric-value {
+      font-size: 31px;
+      font-weight: 800;
+    }
+
+    .metric-foot {
+      color: var(--success);
+      font-size: 12px;
+      margin-top: 8px;
+      font-weight: 650;
+    }
+
+    .panel {
+      display: none;
+    }
+
+    .panel.active {
+      display: block;
+    }
+
+    .content-grid {
+      display: grid;
+      grid-template-columns: 1.35fr .85fr;
+      gap: 18px;
+    }
+
+    .card {
+      background: var(--panel);
+      border-radius: var(--radius);
+      padding: 20px;
+      box-shadow: var(--shadow);
+      border: 1px solid rgba(226,232,240,.75);
+    }
+
+    .card-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 12px;
+      margin-bottom: 16px;
+    }
+
+    .card h2 {
+      font-size: 18px;
+      font-weight: 780;
+    }
+
+    .card p {
+      color: var(--muted);
+      font-size: 14px;
+      line-height: 1.55;
+    }
+
+    .toolbar {
+      display: flex;
+      gap: 10px;
+      margin-bottom: 15px;
+      flex-wrap: wrap;
+    }
+
+    .field,
+    .select {
+      border: 1px solid var(--line);
+      background: white;
+      border-radius: 12px;
+      padding: 10px 12px;
+      color: var(--text);
+      outline: none;
+      font-size: 14px;
+    }
+
+    .field:focus,
+    .select:focus,
+    textarea:focus {
+      border-color: rgba(36, 107, 254, .6);
+      box-shadow: 0 0 0 4px rgba(36, 107, 254, .08);
+    }
+
+    .field {
+      min-width: 260px;
+      flex: 1;
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      overflow: hidden;
+    }
+
+    th {
+      color: var(--muted);
+      background: #f8fafc;
+      font-size: 12px;
+      text-transform: uppercase;
+      letter-spacing: .04em;
+      padding: 13px 12px;
+      text-align: left;
+      border-top: 1px solid var(--line);
+      border-bottom: 1px solid var(--line);
+    }
+
+    td {
+      padding: 14px 12px;
+      border-bottom: 1px solid var(--line);
+      font-size: 14px;
+      vertical-align: middle;
+    }
+
+    .badge {
+      display: inline-flex;
+      align-items: center;
+      padding: 6px 10px;
+      border-radius: 999px;
+      font-size: 12px;
+      font-weight: 760;
+    }
+
+    .published { background: #dcfce7; color: #166534; }
+    .draft { background: #fef3c7; color: #92400e; }
+    .paused { background: #fee2e2; color: #991b1b; }
+    .blue { background: #dbeafe; color: #1e40af; }
+    .violet { background: #ede9fe; color: #5b21b6; }
+
+    .row-actions {
+      display: flex;
+      gap: 6px;
+    }
+
+    .icon-btn {
+      width: 34px;
+      height: 34px;
+      border: 1px solid var(--line);
+      background: #fff;
+      color: #334155;
+      border-radius: 11px;
+      cursor: pointer;
+      display: grid;
+      place-items: center;
+      transition: .18s ease;
+    }
+
+    .icon-btn svg {
+      width: 16px;
+      height: 16px;
+    }
+
+    .icon-btn:hover {
+      border-color: rgba(36,107,254,.5);
+      color: var(--primary);
+      background: #f8fbff;
+    }
+
+    .steps {
+      display: grid;
+      gap: 12px;
+    }
+
+    .step {
+      display: grid;
+      grid-template-columns: 38px 1fr;
+      gap: 12px;
+      padding: 13px;
+      border: 1px solid var(--line);
+      border-radius: 15px;
+      background: #fbfdff;
+    }
+
+    .step-number {
+      width: 38px;
+      height: 38px;
+      border-radius: 12px;
+      display: grid;
+      place-items: center;
+      background: #eef2ff;
+      color: var(--primary);
+      font-weight: 800;
+    }
+
+    .step h3 {
+      font-size: 14px;
+      margin-bottom: 4px;
+    }
+
+    .step p {
+      font-size: 13px;
+    }
+
+    .builder {
+      display: grid;
+      grid-template-columns: 280px 1fr;
+      gap: 18px;
+    }
+
+    .palette {
+      display: grid;
+      gap: 10px;
+    }
+
+    .palette button {
+      border: 1px solid var(--line);
+      background: #fff;
+      border-radius: 14px;
+      padding: 12px;
+      text-align: left;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      color: var(--text);
+      font-weight: 700;
+    }
+
+    .palette button:hover {
+      border-color: rgba(36,107,254,.55);
+      background: #f8fbff;
+    }
+
+    .palette svg {
+      width: 18px;
+      height: 18px;
+      color: var(--primary);
+    }
+
+    .form-preview {
+      border: 1px dashed #cbd5e1;
+      border-radius: 18px;
+      min-height: 410px;
+      background: linear-gradient(180deg, #ffffff 0%, #f8fafc 100%);
+      padding: 18px;
+    }
+
+    .preview-title {
+      font-weight: 800;
+      font-size: 17px;
+      margin-bottom: 4px;
+    }
+
+    .preview-subtitle {
+      color: var(--muted);
+      font-size: 13px;
+      margin-bottom: 18px;
+    }
+
+    .created-field {
+      border: 1px solid var(--line);
+      background: #fff;
+      border-radius: 14px;
+      padding: 13px;
+      margin-bottom: 12px;
+    }
+
+    .created-field label {
+      display: block;
+      font-size: 13px;
+      font-weight: 750;
+      margin-bottom: 7px;
+    }
+
+    .created-field input,
+    .created-field textarea,
+    .created-field select {
+      width: 100%;
+      border: 1px solid var(--line);
+      border-radius: 11px;
+      padding: 10px;
+      color: var(--muted);
+      background: #f8fafc;
+    }
+
+    .workflow-list {
+      display: grid;
+      gap: 12px;
+    }
+
+    .workflow {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 14px;
+      border: 1px solid var(--line);
+      border-radius: 16px;
+      padding: 14px;
+      background: #fff;
+    }
+
+    .workflow strong {
+      display: block;
+      font-size: 14px;
+      margin-bottom: 4px;
+    }
+
+    .workflow span {
+      color: var(--muted);
+      font-size: 13px;
+    }
+
+    .switch {
+      width: 48px;
+      height: 28px;
+      background: #cbd5e1;
+      border-radius: 999px;
+      position: relative;
+      cursor: pointer;
+      transition: .2s;
+      flex: none;
+    }
+
+    .switch::after {
+      content: "";
+      position: absolute;
+      width: 22px;
+      height: 22px;
+      border-radius: 50%;
+      background: white;
+      left: 3px;
+      top: 3px;
+      transition: .2s;
+      box-shadow: 0 2px 8px rgba(0,0,0,.18);
+    }
+
+    .switch.on {
+      background: var(--success);
+    }
+
+    .switch.on::after {
+      left: 23px;
+    }
+
+    .modal {
+      position: fixed;
+      inset: 0;
+      display: none;
+      align-items: center;
+      justify-content: center;
+      background: rgba(15,23,42,.48);
+      z-index: 20;
+      padding: 20px;
+    }
+
+    .modal.active {
+      display: flex;
+    }
+
+    .modal-card {
+      width: min(560px, 100%);
+      background: white;
+      border-radius: 24px;
+      padding: 22px;
+      box-shadow: 0 24px 70px rgba(15,23,42,.26);
+    }
+
+    .modal-card h2 {
+      font-size: 20px;
+      margin-bottom: 6px;
+    }
+
+    .modal-card p {
+      color: var(--muted);
+      font-size: 14px;
+      line-height: 1.5;
+      margin-bottom: 18px;
+    }
+
+    .form-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 12px;
+    }
+
+    .form-group {
+      margin-bottom: 12px;
+    }
+
+    .form-group.full {
+      grid-column: 1 / -1;
+    }
+
+    .form-group label {
+      display: block;
+      font-size: 13px;
+      color: #334155;
+      font-weight: 750;
+      margin-bottom: 7px;
+    }
+
+    .form-group input,
+    .form-group select,
+    .form-group textarea {
+      width: 100%;
+      border: 1px solid var(--line);
+      border-radius: 12px;
+      padding: 11px;
+      outline: none;
+      font-size: 14px;
+    }
+
+    .form-group textarea {
+      min-height: 88px;
+      resize: vertical;
+    }
+
+    .modal-actions {
+      display: flex;
+      justify-content: flex-end;
+      gap: 10px;
+      margin-top: 8px;
+    }
+
+    .toast {
+      position: fixed;
+      right: 22px;
+      bottom: 22px;
+      background: #0f172a;
+      color: white;
+      padding: 14px 16px;
+      border-radius: 14px;
+      box-shadow: 0 18px 40px rgba(15,23,42,.25);
+      display: none;
+      z-index: 30;
+      font-size: 14px;
+    }
+
+    .toast.show {
+      display: block;
+      animation: fadeIn .2s ease;
+    }
+
+    @keyframes fadeIn {
+      from { transform: translateY(8px); opacity: 0; }
+      to { transform: translateY(0); opacity: 1; }
+    }
+
+    @media (max-width: 1050px) {
+      .workspace { grid-template-columns: 1fr; }
+      .sidebar { height: auto; position: static; }
+      .main { padding: 18px; }
+      .metrics, .content-grid, .builder { grid-template-columns: 1fr; }
+      .header { flex-direction: column; align-items: flex-start; }
+      .actions { justify-content: flex-start; }
+    }
+  </style>
+</head>
+<body>
+  <div class="workspace">
+    <aside class="sidebar">
+      <div class="brand">
+        <div class="brand-mark">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M4 7.5A3.5 3.5 0 0 1 7.5 4h9A3.5 3.5 0 0 1 20 7.5v9a3.5 3.5 0 0 1-3.5 3.5h-9A3.5 3.5 0 0 1 4 16.5v-9Z"/><path d="M8 9h8M8 13h5M8 17h3"/></svg>
+        </div>
+        <div>
+          <div class="brand-title">Creator Studio</div>
+          <div class="brand-subtitle">Low-code workspace</div>
+        </div>
+      </div>
+
+      <div class="nav-section">Principal</div>
+      <button class="nav-button active" onclick="showPanel('overview', this)">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M4 13h6V4H4v9Zm0 7h6v-4H4v4Zm10 0h6v-9h-6v9Zm0-16v4h6V4h-6Z"/></svg>
+        Panel general
+      </button>
+      <button class="nav-button" onclick="showPanel('applications', this)">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M5 5h6v6H5V5Zm8 0h6v6h-6V5ZM5 13h6v6H5v-6Zm8 0h6v6h-6v-6Z"/></svg>
+        Aplicaciones
+      </button>
+      <button class="nav-button" onclick="showPanel('builder', this)">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M12 3v18M3 12h18"/><path d="M5 5h4v4H5V5Zm10 0h4v4h-4V5ZM5 15h4v4H5v-4Zm10 0h4v4h-4v-4Z"/></svg>
+        Constructor
+      </button>
+      <button class="nav-button" onclick="showPanel('workflows', this)">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M6 6h.01M18 6h.01M6 18h.01M18 18h.01"/><path d="M6 6h12v12H6z"/><path d="M9 12h6"/></svg>
+        Flujos
+      </button>
+
+      <div class="nav-section">Control</div>
+      <button class="nav-button" onclick="showPanel('records', this)">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M4 6h16M4 12h16M4 18h16"/><path d="M8 6v12"/></svg>
+        Registros
+      </button>
+      <button class="nav-button" onclick="showPanel('reports', this)">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M5 19V5M5 19h14"/><path d="M8 16v-5M12 16V8M16 16v-9"/></svg>
+        Reportes
+      </button>
+    </aside>
+
+    <main class="main">
+      <header class="header">
+        <div>
+          <div class="eyebrow" id="sectionLabel">Zoho Creator Replica</div>
+          <h1 id="pageTitle">Panel general de aplicaciones</h1>
+          <p id="pageDescription">Prototipo formal de una plataforma low-code para crear formularios, automatizar procesos y administrar registros internos de una empresa.</p>
+        </div>
+        <div class="actions">
+          <button class="btn btn-light" onclick="exportSummary()">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M12 3v12"/><path d="m7 10 5 5 5-5"/><path d="M5 21h14"/></svg>
+            Exportar resumen
+          </button>
+          <button class="btn btn-primary" onclick="openAppModal()">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M12 5v14M5 12h14"/></svg>
+            Nueva aplicación
+          </button>
+        </div>
+      </header>
+
+      <section id="overview" class="panel active">
+        <div class="metrics">
+          <div class="metric">
+            <div class="metric-head"><span class="metric-label">Aplicaciones</span><span class="metric-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M5 5h6v6H5V5Zm8 0h6v6h-6V5ZM5 13h6v6H5v-6Zm8 0h6v6h-6v-6Z"/></svg></span></div>
+            <div class="metric-value" id="metricApps">0</div>
+            <div class="metric-foot">Disponibles en el workspace</div>
+          </div>
+          <div class="metric">
+            <div class="metric-head"><span class="metric-label">Formularios</span><span class="metric-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M7 4h10v16H7z"/><path d="M9 8h6M9 12h6M9 16h4"/></svg></span></div>
+            <div class="metric-value" id="metricForms">0</div>
+            <div class="metric-foot">Campos y pantallas internas</div>
+          </div>
+          <div class="metric">
+            <div class="metric-head"><span class="metric-label">Registros</span><span class="metric-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M4 7h16M4 12h16M4 17h16"/></svg></span></div>
+            <div class="metric-value" id="metricRecords">0</div>
+            <div class="metric-foot">Datos cargados en la demo</div>
+          </div>
+          <div class="metric">
+            <div class="metric-head"><span class="metric-label">Flujos activos</span><span class="metric-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M6 6h12v12H6z"/><path d="M9 12h6"/></svg></span></div>
+            <div class="metric-value" id="metricFlows">0</div>
+            <div class="metric-foot">Automatizaciones configuradas</div>
+          </div>
+        </div>
+
+        <div class="content-grid">
+          <div class="card">
+            <div class="card-header">
+              <h2>Aplicaciones recientes</h2>
+              <button class="btn btn-light" onclick="showPanelById('applications')">Ver todas</button>
+            </div>
+            <table>
+              <thead><tr><th>Aplicación</th><th>Área</th><th>Estado</th><th>Registros</th></tr></thead>
+              <tbody id="overviewApps"></tbody>
+            </table>
+          </div>
+          <div class="card">
+            <h2>Uso del prototipo</h2>
+            <div class="steps" style="margin-top:14px">
+              <div class="step"><div class="step-number">1</div><div><h3>Crear aplicación</h3><p>Se define el área, estado y cantidad inicial de registros.</p></div></div>
+              <div class="step"><div class="step-number">2</div><div><h3>Diseñar formulario</h3><p>El constructor permite añadir campos simulados al formulario.</p></div></div>
+              <div class="step"><div class="step-number">3</div><div><h3>Automatizar</h3><p>Los flujos representan reglas automáticas tipo aprobaciones o alertas.</p></div></div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section id="applications" class="panel">
+        <div class="card">
+          <div class="card-header"><h2>Aplicaciones creadas</h2><button class="btn btn-primary" onclick="openAppModal()">Nueva aplicación</button></div>
+          <div class="toolbar">
+            <input class="field" id="appSearch" placeholder="Buscar aplicación o área..." oninput="renderApps()" />
+            <select class="select" id="statusFilter" onchange="renderApps()">
+              <option value="Todos">Todos los estados</option>
+              <option value="Publicado">Publicado</option>
+              <option value="Borrador">Borrador</option>
+              <option value="Pausado">Pausado</option>
+            </select>
+          </div>
+          <table>
+            <thead><tr><th>Nombre</th><th>Área</th><th>Tipo</th><th>Estado</th><th>Registros</th><th>Acciones</th></tr></thead>
+            <tbody id="appRows"></tbody>
+          </table>
+        </div>
+      </section>
+
+      <section id="builder" class="panel">
+        <div class="builder">
+          <div class="card">
+            <h2>Paleta de campos</h2>
+            <p style="margin:8px 0 16px">Añade componentes al formulario para simular un constructor low-code.</p>
+            <div class="palette">
+              <button onclick="addField('Texto corto')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M4 7h16M8 7v10M16 7v10"/></svg>Texto corto</button>
+              <button onclick="addField('Número')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M9 7h6M8 12h8M9 17h6"/></svg>Número</button>
+              <button onclick="addField('Fecha')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M7 3v4M17 3v4M4 9h16M5 5h14v15H5z"/></svg>Fecha</button>
+              <button onclick="addField('Lista desplegable')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M7 10l5 5 5-5"/><path d="M5 5h14v14H5z"/></svg>Lista desplegable</button>
+              <button onclick="clearBuilder()"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M4 7h16M10 11v6M14 11v6M6 7l1 13h10l1-13M9 7V4h6v3"/></svg>Limpiar formulario</button>
+            </div>
+          </div>
+          <div class="card">
+            <div class="card-header"><h2>Vista previa del formulario</h2><button class="btn btn-light" onclick="saveForm()">Guardar diseño</button></div>
+            <div class="form-preview" id="formPreview">
+              <div class="preview-title">Solicitud interna</div>
+              <div class="preview-subtitle">Formulario creado con campos dinámicos.</div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section id="workflows" class="panel">
+        <div class="content-grid">
+          <div class="card">
+            <div class="card-header"><h2>Flujos de trabajo</h2><button class="btn btn-light" onclick="addWorkflow()">Añadir flujo</button></div>
+            <div class="workflow-list" id="workflowList"></div>
+          </div>
+          <div class="card">
+            <h2>Qué representa</h2>
+            <p style="margin-top:10px">En Zoho Creator, los flujos permiten automatizar acciones. Por ejemplo, enviar una notificación cuando se registra una solicitud, aprobar un gasto o actualizar un estado sin hacerlo manualmente.</p>
+          </div>
+        </div>
+      </section>
+
+      <section id="records" class="panel">
+        <div class="card">
+          <div class="card-header"><h2>Registros simulados</h2><button class="btn btn-primary" onclick="addRecord()">Agregar registro</button></div>
+          <table>
+            <thead><tr><th>ID</th><th>Aplicación</th><th>Responsable</th><th>Fecha</th><th>Estado</th><th>Acción</th></tr></thead>
+            <tbody id="recordRows"></tbody>
+          </table>
+        </div>
+      </section>
+
+      <section id="reports" class="panel">
+        <div class="metrics">
+          <div class="metric"><div class="metric-head"><span class="metric-label">Apps publicadas</span><span class="metric-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M20 6 9 17l-5-5"/></svg></span></div><div class="metric-value" id="publishedCount">0</div><div class="metric-foot">Listas para operación</div></div>
+          <div class="metric"><div class="metric-head"><span class="metric-label">Borradores</span><span class="metric-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M4 20h16"/><path d="M6 16l10-10 2 2L8 18H6v-2Z"/></svg></span></div><div class="metric-value" id="draftCount">0</div><div class="metric-foot">Pendientes de revisión</div></div>
+          <div class="metric"><div class="metric-head"><span class="metric-label">Campos diseñados</span><span class="metric-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M5 5h14v14H5z"/><path d="M8 9h8M8 13h8"/></svg></span></div><div class="metric-value" id="fieldCount">0</div><div class="metric-foot">Constructor visual</div></div>
+          <div class="metric"><div class="metric-head"><span class="metric-label">Eficiencia demo</span><span class="metric-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M12 20a8 8 0 1 0-8-8"/><path d="M12 12l5-5"/></svg></span></div><div class="metric-value">86%</div><div class="metric-foot">Indicador referencial</div></div>
+        </div>
+        <div class="card">
+          <h2>Resumen ejecutivo</h2>
+          <p style="margin-top:10px">Este prototipo muestra cómo una empresa podría crear aplicaciones internas sin desarrollar un sistema desde cero. Se representan formularios, registros, flujos automáticos, estados de publicación y reportes básicos.</p>
+        </div>
+      </section>
+    </main>
+  </div>
+
+  <div class="modal" id="appModal">
+    <div class="modal-card">
+      <h2>Nueva aplicación</h2>
+      <p>Registra una aplicación interna para simular el funcionamiento de una plataforma low-code empresarial.</p>
+      <div class="form-grid">
+        <div class="form-group"><label>Nombre</label><input id="newAppName" placeholder="Ej. Control de compras" /></div>
+        <div class="form-group"><label>Área</label><input id="newAppArea" placeholder="Ej. Finanzas" /></div>
+        <div class="form-group"><label>Tipo</label><select id="newAppType"><option>Formulario</option><option>Gestión</option><option>Reporte</option><option>Aprobación</option></select></div>
+        <div class="form-group"><label>Estado</label><select id="newAppStatus"><option>Publicado</option><option>Borrador</option><option>Pausado</option></select></div>
+        <div class="form-group full"><label>Descripción</label><textarea id="newAppDescription" placeholder="Describe brevemente el proceso que digitaliza esta aplicación"></textarea></div>
+      </div>
+      <div class="modal-actions">
+        <button class="btn btn-light" onclick="closeAppModal()">Cancelar</button>
+        <button class="btn btn-primary" onclick="createApplication()">Guardar aplicación</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="toast" id="toast"></div>
+
+  <script>
+    let applications = [
+      { id: 1, name: 'Solicitudes de compra', area: 'Finanzas', type: 'Aprobación', status: 'Publicado', records: 48 },
+      { id: 2, name: 'Registro de proveedores', area: 'Compras', type: 'Formulario', status: 'Publicado', records: 32 },
+      { id: 3, name: 'Control de inventario interno', area: 'Almacén', type: 'Gestión', status: 'Borrador', records: 15 },
+      { id: 4, name: 'Evaluación de desempeño', area: 'RRHH', type: 'Reporte', status: 'Pausado', records: 21 }
+    ];
+
+    let records = [
+      { id: 'RC-101', app: 'Solicitudes de compra', owner: 'Alejandra', date: '2026-05-28', status: 'Pendiente' },
+      { id: 'RC-102', app: 'Registro de proveedores', owner: 'Jairo', date: '2026-05-29', status: 'Validado' },
+      { id: 'RC-103', app: 'Control de inventario interno', owner: 'José Luis', date: '2026-05-30', status: 'En revisión' }
+    ];
+
+    let workflows = [
+      { name: 'Notificar solicitud nueva', detail: 'Envía aviso al responsable cuando se crea un registro.', active: true },
+      { name: 'Aprobación de compras', detail: 'Cambia el estado cuando gerencia aprueba una solicitud.', active: true },
+      { name: 'Alerta de datos incompletos', detail: 'Marca registros que no cumplen validaciones mínimas.', active: false }
+    ];
+
+    let builderFields = [];
+
+    function getStatusClass(status) {
+      if (status === 'Publicado') return 'published';
+      if (status === 'Borrador') return 'draft';
+      if (status === 'Pausado') return 'paused';
+      if (status === 'Validado') return 'published';
+      if (status === 'Pendiente') return 'draft';
+      return 'blue';
+    }
+
+    function showToast(message) {
+      const toast = document.getElementById('toast');
+      toast.textContent = message;
+      toast.classList.add('show');
+      setTimeout(() => toast.classList.remove('show'), 2200);
+    }
+
+    function showPanel(panelId, button) {
+      document.querySelectorAll('.panel').forEach(panel => panel.classList.remove('active'));
+      document.getElementById(panelId).classList.add('active');
+      document.querySelectorAll('.nav-button').forEach(btn => btn.classList.remove('active'));
+      button.classList.add('active');
+      setHeader(panelId);
+      renderAll();
+    }
+
+    function showPanelById(panelId) {
+      const button = [...document.querySelectorAll('.nav-button')].find(btn => btn.getAttribute('onclick')?.includes(panelId));
+      if (button) showPanel(panelId, button);
+    }
+
+    function setHeader(panelId) {
+      const data = {
+        overview: ['Zoho Creator Replica', 'Panel general de aplicaciones', 'Prototipo formal de una plataforma low-code para crear formularios, automatizar procesos y administrar registros internos de una empresa.'],
+        applications: ['Gestión low-code', 'Aplicaciones internas', 'Administra aplicaciones creadas para diferentes áreas de la organización, con estados, tipos y registros.'],
+        builder: ['Constructor visual', 'Diseñador de formularios', 'Simula la creación de campos personalizados como texto, números, fechas y listas desplegables.'],
+        workflows: ['Automatización', 'Flujos de trabajo', 'Configura reglas automáticas para aprobaciones, notificaciones y validaciones internas.'],
+        records: ['Datos operativos', 'Registros de aplicaciones', 'Consulta y administra datos de ejemplo generados por las aplicaciones internas.'],
+        reports: ['Indicadores', 'Reportes y métricas', 'Visualiza indicadores básicos de uso, publicación y diseño de formularios.' ]
+      };
+      document.getElementById('sectionLabel').textContent = data[panelId][0];
+      document.getElementById('pageTitle').textContent = data[panelId][1];
+      document.getElementById('pageDescription').textContent = data[panelId][2];
+    }
+
+    function renderMetrics() {
+      document.getElementById('metricApps').textContent = applications.length;
+      document.getElementById('metricForms').textContent = applications.filter(app => app.type === 'Formulario' || app.type === 'Aprobación').length + builderFields.length;
+      document.getElementById('metricRecords').textContent = applications.reduce((sum, app) => sum + app.records, 0) + records.length;
+      document.getElementById('metricFlows').textContent = workflows.filter(flow => flow.active).length;
+      document.getElementById('publishedCount').textContent = applications.filter(app => app.status === 'Publicado').length;
+      document.getElementById('draftCount').textContent = applications.filter(app => app.status === 'Borrador').length;
+      document.getElementById('fieldCount').textContent = builderFields.length;
+    }
+
+    function appRow(app, withActions = false) {
+      return `
+        <tr>
+          <td><strong>${app.name}</strong></td>
+          <td>${app.area}</td>
+          <td><span class="badge violet">${app.type}</span></td>
+          <td><span class="badge ${getStatusClass(app.status)}">${app.status}</span></td>
+          <td>${app.records}</td>
+          ${withActions ? `<td><div class="row-actions">
+            <button class="icon-btn" title="Publicar" onclick="changeAppStatus(${app.id}, 'Publicado')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M20 6 9 17l-5-5"/></svg></button>
+            <button class="icon-btn" title="Pausar" onclick="changeAppStatus(${app.id}, 'Pausado')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M10 5v14M14 5v14"/></svg></button>
+            <button class="icon-btn" title="Eliminar" onclick="deleteApp(${app.id})"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M4 7h16M10 11v6M14 11v6M6 7l1 13h10l1-13M9 7V4h6v3"/></svg></button>
+          </div></td>` : ''}
+        </tr>
+      `;
+    }
+
+    function renderOverview() {
+      document.getElementById('overviewApps').innerHTML = applications.slice(0, 4).map(app => appRow(app, false)).join('');
+    }
+
+    function renderApps() {
+      const search = (document.getElementById('appSearch')?.value || '').toLowerCase();
+      const status = document.getElementById('statusFilter')?.value || 'Todos';
+      const filtered = applications.filter(app => {
+        const matchesSearch = app.name.toLowerCase().includes(search) || app.area.toLowerCase().includes(search);
+        const matchesStatus = status === 'Todos' || app.status === status;
+        return matchesSearch && matchesStatus;
+      });
+      document.getElementById('appRows').innerHTML = filtered.map(app => appRow(app, true)).join('');
+    }
+
+    function renderBuilder() {
+      const preview = document.getElementById('formPreview');
+      const base = `<div class="preview-title">Solicitud interna</div><div class="preview-subtitle">Formulario creado con campos dinámicos.</div>`;
+      const fields = builderFields.map((field, index) => {
+        let control = '<input placeholder="Campo de texto" disabled />';
+        if (field === 'Número') control = '<input placeholder="0" disabled />';
+        if (field === 'Fecha') control = '<input placeholder="dd/mm/aaaa" disabled />';
+        if (field === 'Lista desplegable') control = '<select disabled><option>Seleccione una opción</option></select>';
+        return `<div class="created-field"><label>${index + 1}. ${field}</label>${control}</div>`;
+      }).join('');
+      preview.innerHTML = base + fields;
+    }
+
+    function renderWorkflows() {
+      document.getElementById('workflowList').innerHTML = workflows.map((flow, index) => `
+        <div class="workflow">
+          <div><strong>${flow.name}</strong><span>${flow.detail}</span></div>
+          <div class="switch ${flow.active ? 'on' : ''}" onclick="toggleWorkflow(${index})"></div>
+        </div>
+      `).join('');
+    }
+
+    function renderRecords() {
+      document.getElementById('recordRows').innerHTML = records.map(record => `
+        <tr>
+          <td>${record.id}</td>
+          <td><strong>${record.app}</strong></td>
+          <td>${record.owner}</td>
+          <td>${record.date}</td>
+          <td><span class="badge ${getStatusClass(record.status)}">${record.status}</span></td>
+          <td><button class="icon-btn" onclick="deleteRecord('${record.id}')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M4 7h16M10 11v6M14 11v6M6 7l1 13h10l1-13M9 7V4h6v3"/></svg></button></td>
+        </tr>
+      `).join('');
+    }
+
+    function renderAll() {
+      renderMetrics();
+      renderOverview();
+      renderApps();
+      renderBuilder();
+      renderWorkflows();
+      renderRecords();
+    }
+
+    function openAppModal() {
+      document.getElementById('appModal').classList.add('active');
+    }
+
+    function closeAppModal() {
+      document.getElementById('appModal').classList.remove('active');
+      document.getElementById('newAppName').value = '';
+      document.getElementById('newAppArea').value = '';
+      document.getElementById('newAppDescription').value = '';
+    }
+
+    function createApplication() {
+      const name = document.getElementById('newAppName').value.trim();
+      const area = document.getElementById('newAppArea').value.trim();
+      const type = document.getElementById('newAppType').value;
+      const status = document.getElementById('newAppStatus').value;
+      if (!name || !area) {
+        showToast('Completa el nombre y el área de la aplicación.');
+        return;
+      }
+      applications.push({ id: Date.now(), name, area, type, status, records: Math.floor(Math.random() * 18) + 1 });
+      closeAppModal();
+      renderAll();
+      showToast('Aplicación creada correctamente.');
+    }
+
+    function changeAppStatus(id, status) {
+      applications = applications.map(app => app.id === id ? { ...app, status } : app);
+      renderAll();
+      showToast(`Estado actualizado a ${status}.`);
+    }
+
+    function deleteApp(id) {
+      if (!confirm('¿Deseas eliminar esta aplicación de la demo?')) return;
+      applications = applications.filter(app => app.id !== id);
+      renderAll();
+      showToast('Aplicación eliminada.');
+    }
+
+    function addField(type) {
+      builderFields.push(type);
+      renderAll();
+      showToast(`Campo agregado: ${type}.`);
+    }
+
+    function clearBuilder() {
+      builderFields = [];
+      renderAll();
+      showToast('Formulario limpiado.');
+    }
+
+    function saveForm() {
+      if (builderFields.length === 0) {
+        showToast('Añade al menos un campo antes de guardar.');
+        return;
+      }
+      showToast('Diseño del formulario guardado en la demo.');
+    }
+
+    function toggleWorkflow(index) {
+      workflows[index].active = !workflows[index].active;
+      renderAll();
+      showToast(workflows[index].active ? 'Flujo activado.' : 'Flujo desactivado.');
+    }
+
+    function addWorkflow() {
+      workflows.push({ name: 'Nuevo flujo automático', detail: 'Regla creada para simular una automatización interna.', active: false });
+      renderAll();
+      showToast('Nuevo flujo añadido.');
+    }
+
+    function addRecord() {
+      const app = applications[Math.floor(Math.random() * applications.length)] || { name: 'Aplicación demo' };
+      const names = ['Alejandra', 'Jairo', 'José Luis', 'Cedric', 'Gustavo'];
+      const statuses = ['Pendiente', 'Validado', 'En revisión'];
+      records.push({
+        id: 'RC-' + Math.floor(Math.random() * 900 + 100),
+        app: app.name,
+        owner: names[Math.floor(Math.random() * names.length)],
+        date: '2026-05-30',
+        status: statuses[Math.floor(Math.random() * statuses.length)]
+      });
+      renderAll();
+      showToast('Registro agregado.');
+    }
+
+    function deleteRecord(id) {
+      records = records.filter(record => record.id !== id);
+      renderAll();
+      showToast('Registro eliminado.');
+    }
+
+    function exportSummary() {
+      const summary = `Resumen Creator Studio\nAplicaciones: ${applications.length}\nRegistros: ${records.length}\nFlujos activos: ${workflows.filter(w => w.active).length}\nCampos diseñados: ${builderFields.length}`;
+      navigator.clipboard?.writeText(summary);
+      showToast('Resumen copiado al portapapeles.');
+    }
+
+    renderAll();
+  </script>
+</body>
+</html>

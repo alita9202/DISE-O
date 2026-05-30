@@ -1,0 +1,697 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Zoho Desk Clone - Prototipo Funcional</title>
+  <style>
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      font-family: Arial, Helvetica, sans-serif;
+    }
+
+    body {
+      background: #f4f6f9;
+      color: #1f2937;
+    }
+
+    .app {
+      display: flex;
+      min-height: 100vh;
+    }
+
+    .sidebar {
+      width: 245px;
+      background: #111827;
+      color: #fff;
+      padding: 22px 16px;
+      position: fixed;
+      height: 100vh;
+      left: 0;
+      top: 0;
+    }
+
+    .brand {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      margin-bottom: 28px;
+    }
+
+    .brand-logo {
+      width: 40px;
+      height: 40px;
+      border-radius: 12px;
+      background: linear-gradient(135deg, #2563eb, #22c55e);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: bold;
+    }
+
+    .brand h1 {
+      font-size: 18px;
+    }
+
+    .brand p {
+      font-size: 12px;
+      color: #9ca3af;
+    }
+
+    .menu button {
+      width: 100%;
+      border: none;
+      background: transparent;
+      color: #d1d5db;
+      padding: 12px 14px;
+      text-align: left;
+      border-radius: 10px;
+      cursor: pointer;
+      margin-bottom: 6px;
+      font-size: 14px;
+      transition: 0.2s;
+    }
+
+    .menu button:hover,
+    .menu button.active {
+      background: #2563eb;
+      color: #fff;
+    }
+
+    .main {
+      margin-left: 245px;
+      width: calc(100% - 245px);
+      padding: 22px;
+    }
+
+    .topbar {
+      background: #fff;
+      padding: 18px 22px;
+      border-radius: 18px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      box-shadow: 0 10px 25px rgba(0,0,0,0.06);
+      margin-bottom: 22px;
+    }
+
+    .topbar h2 {
+      font-size: 24px;
+      margin-bottom: 4px;
+    }
+
+    .topbar p {
+      font-size: 14px;
+      color: #6b7280;
+    }
+
+    .btn-primary {
+      background: #2563eb;
+      color: #fff;
+      border: none;
+      padding: 11px 16px;
+      border-radius: 12px;
+      cursor: pointer;
+      font-weight: bold;
+    }
+
+    .btn-primary:hover {
+      background: #1d4ed8;
+    }
+
+    .cards {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 16px;
+      margin-bottom: 22px;
+    }
+
+    .card {
+      background: #fff;
+      border-radius: 18px;
+      padding: 18px;
+      box-shadow: 0 10px 25px rgba(0,0,0,0.05);
+    }
+
+    .card span {
+      color: #6b7280;
+      font-size: 13px;
+    }
+
+    .card h3 {
+      font-size: 28px;
+      margin-top: 8px;
+    }
+
+    .tools {
+      display: flex;
+      gap: 10px;
+      margin-bottom: 16px;
+    }
+
+    .tools input,
+    .tools select {
+      padding: 11px 12px;
+      border: 1px solid #d1d5db;
+      border-radius: 12px;
+      background: #fff;
+    }
+
+    .tools input {
+      flex: 1;
+    }
+
+    .panel {
+      display: none;
+    }
+
+    .panel.active {
+      display: block;
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      background: #fff;
+      border-radius: 18px;
+      overflow: hidden;
+      box-shadow: 0 10px 25px rgba(0,0,0,0.05);
+    }
+
+    th, td {
+      padding: 14px;
+      border-bottom: 1px solid #e5e7eb;
+      text-align: left;
+      font-size: 14px;
+    }
+
+    th {
+      background: #f9fafb;
+      color: #374151;
+    }
+
+    .badge {
+      padding: 6px 10px;
+      border-radius: 999px;
+      font-size: 12px;
+      font-weight: bold;
+      display: inline-block;
+    }
+
+    .abierto { background: #fee2e2; color: #991b1b; }
+    .proceso { background: #fef3c7; color: #92400e; }
+    .cerrado { background: #dcfce7; color: #166534; }
+    .alta { background: #fecaca; color: #7f1d1d; }
+    .media { background: #dbeafe; color: #1e40af; }
+    .baja { background: #e5e7eb; color: #374151; }
+
+    .action-btn {
+      border: none;
+      background: #eef2ff;
+      color: #3730a3;
+      padding: 7px 10px;
+      border-radius: 9px;
+      cursor: pointer;
+      margin-right: 5px;
+      font-size: 12px;
+    }
+
+    .action-btn:hover {
+      background: #c7d2fe;
+    }
+
+    .grid-2 {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 18px;
+    }
+
+    .list-item {
+      padding: 14px;
+      border-bottom: 1px solid #e5e7eb;
+    }
+
+    .list-item h4 {
+      margin-bottom: 5px;
+    }
+
+    .list-item p {
+      color: #6b7280;
+      font-size: 14px;
+    }
+
+    .modal {
+      display: none;
+      position: fixed;
+      inset: 0;
+      background: rgba(0,0,0,0.45);
+      align-items: center;
+      justify-content: center;
+      z-index: 10;
+    }
+
+    .modal.active {
+      display: flex;
+    }
+
+    .modal-content {
+      background: #fff;
+      width: 520px;
+      border-radius: 20px;
+      padding: 22px;
+      box-shadow: 0 20px 50px rgba(0,0,0,0.2);
+    }
+
+    .modal-content h3 {
+      margin-bottom: 16px;
+    }
+
+    .form-group {
+      margin-bottom: 12px;
+    }
+
+    .form-group label {
+      display: block;
+      font-size: 13px;
+      margin-bottom: 6px;
+      color: #374151;
+    }
+
+    .form-group input,
+    .form-group select,
+    .form-group textarea {
+      width: 100%;
+      padding: 11px;
+      border-radius: 10px;
+      border: 1px solid #d1d5db;
+    }
+
+    .form-group textarea {
+      min-height: 90px;
+      resize: vertical;
+    }
+
+    .modal-actions {
+      display: flex;
+      justify-content: flex-end;
+      gap: 10px;
+      margin-top: 14px;
+    }
+
+    .btn-secondary {
+      background: #e5e7eb;
+      color: #111827;
+      border: none;
+      padding: 11px 16px;
+      border-radius: 12px;
+      cursor: pointer;
+      font-weight: bold;
+    }
+
+    .note {
+      background: #eff6ff;
+      border-left: 5px solid #2563eb;
+      padding: 15px;
+      border-radius: 12px;
+      margin-bottom: 15px;
+      color: #1e3a8a;
+    }
+
+    @media (max-width: 900px) {
+      .sidebar {
+        position: static;
+        width: 100%;
+        height: auto;
+      }
+
+      .app {
+        flex-direction: column;
+      }
+
+      .main {
+        margin-left: 0;
+        width: 100%;
+      }
+
+      .cards,
+      .grid-2 {
+        grid-template-columns: 1fr;
+      }
+
+      .tools {
+        flex-direction: column;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="app">
+    <aside class="sidebar">
+      <div class="brand">
+        <div class="brand-logo">ZD</div>
+        <div>
+          <h1>Zoho Desk</h1>
+          <p>Prototipo funcional</p>
+        </div>
+      </div>
+
+      <nav class="menu">
+        <button class="active" onclick="showPanel('dashboard', this)">📊 Dashboard</button>
+        <button onclick="showPanel('tickets', this)">🎫 Tickets</button>
+        <button onclick="showPanel('clientes', this)">👥 Clientes</button>
+        <button onclick="showPanel('base', this)">📚 Base de conocimiento</button>
+        <button onclick="showPanel('reportes', this)">📈 Reportes</button>
+      </nav>
+    </aside>
+
+    <main class="main">
+      <section class="topbar">
+        <div>
+          <h2 id="pageTitle">Dashboard de soporte</h2>
+          <p>Gestiona solicitudes de clientes, prioridades, agentes y estado de atención.</p>
+        </div>
+        <button class="btn-primary" onclick="openModal()">+ Nuevo ticket</button>
+      </section>
+
+      <section id="dashboard" class="panel active">
+        <div class="cards">
+          <div class="card"><span>Tickets abiertos</span><h3 id="countOpen">0</h3></div>
+          <div class="card"><span>En proceso</span><h3 id="countProcess">0</h3></div>
+          <div class="card"><span>Cerrados</span><h3 id="countClosed">0</h3></div>
+          <div class="card"><span>Prioridad alta</span><h3 id="countHigh">0</h3></div>
+        </div>
+
+        <div class="note">
+          Este prototipo representa Zoho Desk: una herramienta para administrar atención al cliente mediante tickets, responsables, estados, prioridades y reportes.
+        </div>
+
+        <table>
+          <thead>
+            <tr>
+              <th>ID</th>
+              <th>Cliente</th>
+              <th>Asunto</th>
+              <th>Prioridad</th>
+              <th>Estado</th>
+              <th>Agente</th>
+            </tr>
+          </thead>
+          <tbody id="dashboardRows"></tbody>
+        </table>
+      </section>
+
+      <section id="tickets" class="panel">
+        <div class="tools">
+          <input id="searchInput" type="text" placeholder="Buscar por cliente, asunto o agente..." oninput="renderTickets()" />
+          <select id="statusFilter" onchange="renderTickets()">
+            <option value="Todos">Todos los estados</option>
+            <option value="Abierto">Abierto</option>
+            <option value="En proceso">En proceso</option>
+            <option value="Cerrado">Cerrado</option>
+          </select>
+          <select id="priorityFilter" onchange="renderTickets()">
+            <option value="Todas">Todas las prioridades</option>
+            <option value="Alta">Alta</option>
+            <option value="Media">Media</option>
+            <option value="Baja">Baja</option>
+          </select>
+        </div>
+
+        <table>
+          <thead>
+            <tr>
+              <th>ID</th>
+              <th>Cliente</th>
+              <th>Asunto</th>
+              <th>Prioridad</th>
+              <th>Estado</th>
+              <th>Agente</th>
+              <th>Acciones</th>
+            </tr>
+          </thead>
+          <tbody id="ticketRows"></tbody>
+        </table>
+      </section>
+
+      <section id="clientes" class="panel">
+        <div class="grid-2">
+          <div class="card">
+            <h3>Clientes frecuentes</h3>
+            <div id="clientList"></div>
+          </div>
+          <div class="card">
+            <h3>Uso empresarial</h3>
+            <div class="list-item">
+              <h4>Seguimiento de reclamos</h4>
+              <p>Permite saber qué cliente reportó un problema, quién lo atiende y en qué estado está.</p>
+            </div>
+            <div class="list-item">
+              <h4>Historial de atención</h4>
+              <p>Ayuda a revisar casos anteriores para dar respuestas más rápidas y ordenadas.</p>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section id="base" class="panel">
+        <div class="grid-2">
+          <div class="card">
+            <h3>Artículos de ayuda</h3>
+            <div class="list-item">
+              <h4>¿Cómo registrar una solicitud?</h4>
+              <p>El cliente envía su problema y el sistema lo convierte en un ticket.</p>
+            </div>
+            <div class="list-item">
+              <h4>¿Qué significa prioridad alta?</h4>
+              <p>Indica que el caso afecta directamente la operación o requiere atención urgente.</p>
+            </div>
+            <div class="list-item">
+              <h4>¿Cuándo cerrar un ticket?</h4>
+              <p>Cuando el problema ya fue solucionado y el cliente recibió respuesta.</p>
+            </div>
+          </div>
+          <div class="card">
+            <h3>Respuesta rápida</h3>
+            <p style="margin-top: 10px; color: #6b7280; line-height: 1.6;">
+              Gracias por comunicarse con soporte. Hemos recibido su solicitud y un agente revisará el caso. Le notificaremos cuando exista una actualización.
+            </p>
+            <button class="btn-primary" style="margin-top: 15px;" onclick="alert('Respuesta rápida copiada para usar en un ticket')">Copiar respuesta</button>
+          </div>
+        </div>
+      </section>
+
+      <section id="reportes" class="panel">
+        <div class="cards">
+          <div class="card"><span>Total tickets</span><h3 id="reportTotal">0</h3></div>
+          <div class="card"><span>Clientes atendidos</span><h3 id="reportClients">0</h3></div>
+          <div class="card"><span>Agentes activos</span><h3>3</h3></div>
+          <div class="card"><span>Satisfacción demo</span><h3>92%</h3></div>
+        </div>
+        <div class="card">
+          <h3>Resumen del prototipo</h3>
+          <p style="margin-top: 10px; color: #6b7280; line-height: 1.7;">
+            Esta sección simula los reportes de Zoho Desk. En un sistema real, aquí se verían tiempos de respuesta, cantidad de reclamos, agentes con más casos, tickets vencidos y nivel de satisfacción del cliente.
+          </p>
+        </div>
+      </section>
+    </main>
+  </div>
+
+  <div id="ticketModal" class="modal">
+    <div class="modal-content">
+      <h3>Crear nuevo ticket</h3>
+      <div class="form-group">
+        <label>Cliente</label>
+        <input id="newClient" type="text" placeholder="Ej: Empresa Los Andes" />
+      </div>
+      <div class="form-group">
+        <label>Asunto</label>
+        <input id="newSubject" type="text" placeholder="Ej: Problema con facturación" />
+      </div>
+      <div class="form-group">
+        <label>Prioridad</label>
+        <select id="newPriority">
+          <option>Alta</option>
+          <option>Media</option>
+          <option>Baja</option>
+        </select>
+      </div>
+      <div class="form-group">
+        <label>Agente asignado</label>
+        <select id="newAgent">
+          <option>Alejandra</option>
+          <option>Jairo</option>
+          <option>José Luis</option>
+        </select>
+      </div>
+      <div class="form-group">
+        <label>Descripción</label>
+        <textarea id="newDescription" placeholder="Describe brevemente el problema del cliente"></textarea>
+      </div>
+      <div class="modal-actions">
+        <button class="btn-secondary" onclick="closeModal()">Cancelar</button>
+        <button class="btn-primary" onclick="createTicket()">Guardar ticket</button>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    let tickets = [
+      { id: 'TK-001', cliente: 'Comercial El Sol', asunto: 'No se generó la factura', prioridad: 'Alta', estado: 'Abierto', agente: 'Alejandra' },
+      { id: 'TK-002', cliente: 'Distribuidora Norte', asunto: 'Error en actualización de inventario', prioridad: 'Media', estado: 'En proceso', agente: 'Jairo' },
+      { id: 'TK-003', cliente: 'Servicios Globales', asunto: 'Solicitud de cambio de correo', prioridad: 'Baja', estado: 'Cerrado', agente: 'José Luis' },
+      { id: 'TK-004', cliente: 'TecnoMarket', asunto: 'Cliente no puede ingresar al portal', prioridad: 'Alta', estado: 'Abierto', agente: 'Alejandra' }
+    ];
+
+    function showPanel(panelId, button) {
+      document.querySelectorAll('.panel').forEach(panel => panel.classList.remove('active'));
+      document.getElementById(panelId).classList.add('active');
+
+      document.querySelectorAll('.menu button').forEach(btn => btn.classList.remove('active'));
+      button.classList.add('active');
+
+      const titles = {
+        dashboard: 'Dashboard de soporte',
+        tickets: 'Gestión de tickets',
+        clientes: 'Clientes y contactos',
+        base: 'Base de conocimiento',
+        reportes: 'Reportes de atención'
+      };
+
+      document.getElementById('pageTitle').textContent = titles[panelId];
+      renderAll();
+    }
+
+    function statusClass(status) {
+      if (status === 'Abierto') return 'abierto';
+      if (status === 'En proceso') return 'proceso';
+      return 'cerrado';
+    }
+
+    function priorityClass(priority) {
+      if (priority === 'Alta') return 'alta';
+      if (priority === 'Media') return 'media';
+      return 'baja';
+    }
+
+    function renderDashboard() {
+      document.getElementById('countOpen').textContent = tickets.filter(t => t.estado === 'Abierto').length;
+      document.getElementById('countProcess').textContent = tickets.filter(t => t.estado === 'En proceso').length;
+      document.getElementById('countClosed').textContent = tickets.filter(t => t.estado === 'Cerrado').length;
+      document.getElementById('countHigh').textContent = tickets.filter(t => t.prioridad === 'Alta').length;
+
+      document.getElementById('dashboardRows').innerHTML = tickets.slice(0, 5).map(ticket => `
+        <tr>
+          <td>${ticket.id}</td>
+          <td>${ticket.cliente}</td>
+          <td>${ticket.asunto}</td>
+          <td><span class="badge ${priorityClass(ticket.prioridad)}">${ticket.prioridad}</span></td>
+          <td><span class="badge ${statusClass(ticket.estado)}">${ticket.estado}</span></td>
+          <td>${ticket.agente}</td>
+        </tr>
+      `).join('');
+    }
+
+    function renderTickets() {
+      const search = document.getElementById('searchInput')?.value.toLowerCase() || '';
+      const status = document.getElementById('statusFilter')?.value || 'Todos';
+      const priority = document.getElementById('priorityFilter')?.value || 'Todas';
+
+      const filtered = tickets.filter(ticket => {
+        const matchesSearch = ticket.cliente.toLowerCase().includes(search) ||
+          ticket.asunto.toLowerCase().includes(search) ||
+          ticket.agente.toLowerCase().includes(search);
+        const matchesStatus = status === 'Todos' || ticket.estado === status;
+        const matchesPriority = priority === 'Todas' || ticket.prioridad === priority;
+        return matchesSearch && matchesStatus && matchesPriority;
+      });
+
+      document.getElementById('ticketRows').innerHTML = filtered.map(ticket => `
+        <tr>
+          <td>${ticket.id}</td>
+          <td>${ticket.cliente}</td>
+          <td>${ticket.asunto}</td>
+          <td><span class="badge ${priorityClass(ticket.prioridad)}">${ticket.prioridad}</span></td>
+          <td><span class="badge ${statusClass(ticket.estado)}">${ticket.estado}</span></td>
+          <td>${ticket.agente}</td>
+          <td>
+            <button class="action-btn" onclick="changeStatus('${ticket.id}', 'En proceso')">Procesar</button>
+            <button class="action-btn" onclick="changeStatus('${ticket.id}', 'Cerrado')">Cerrar</button>
+            <button class="action-btn" onclick="deleteTicket('${ticket.id}')">Eliminar</button>
+          </td>
+        </tr>
+      `).join('');
+    }
+
+    function renderClients() {
+      const clients = [...new Set(tickets.map(t => t.cliente))];
+      document.getElementById('clientList').innerHTML = clients.map(client => {
+        const total = tickets.filter(t => t.cliente === client).length;
+        return `
+          <div class="list-item">
+            <h4>${client}</h4>
+            <p>${total} ticket(s) registrados en soporte.</p>
+          </div>
+        `;
+      }).join('');
+    }
+
+    function renderReports() {
+      document.getElementById('reportTotal').textContent = tickets.length;
+      document.getElementById('reportClients').textContent = [...new Set(tickets.map(t => t.cliente))].length;
+    }
+
+    function renderAll() {
+      renderDashboard();
+      renderTickets();
+      renderClients();
+      renderReports();
+    }
+
+    function openModal() {
+      document.getElementById('ticketModal').classList.add('active');
+    }
+
+    function closeModal() {
+      document.getElementById('ticketModal').classList.remove('active');
+      document.getElementById('newClient').value = '';
+      document.getElementById('newSubject').value = '';
+      document.getElementById('newDescription').value = '';
+    }
+
+    function createTicket() {
+      const cliente = document.getElementById('newClient').value.trim();
+      const asunto = document.getElementById('newSubject').value.trim();
+      const prioridad = document.getElementById('newPriority').value;
+      const agente = document.getElementById('newAgent').value;
+
+      if (!cliente || !asunto) {
+        alert('Completa el cliente y el asunto del ticket.');
+        return;
+      }
+
+      const nextId = 'TK-' + String(tickets.length + 1).padStart(3, '0');
+      tickets.push({ id: nextId, cliente, asunto, prioridad, estado: 'Abierto', agente });
+      closeModal();
+      renderAll();
+      alert('Ticket creado correctamente.');
+    }
+
+    function changeStatus(id, status) {
+      tickets = tickets.map(ticket => ticket.id === id ? { ...ticket, estado: status } : ticket);
+      renderAll();
+    }
+
+    function deleteTicket(id) {
+      const confirmDelete = confirm('¿Seguro que deseas eliminar este ticket?');
+      if (!confirmDelete) return;
+      tickets = tickets.filter(ticket => ticket.id !== id);
+      renderAll();
+    }
+
+    renderAll();
+  </script>
+</body>
+</html>
