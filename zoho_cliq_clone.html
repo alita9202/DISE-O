@@ -1,0 +1,1765 @@
+a<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Zoho Cliq - Portal Trabajo Remoto</title>
+    <!-- Tailwind CSS para diseño responsivo fluido -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <!-- FontAwesome para iconos idénticos a los de Zoho -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <style>
+        :root {
+            /* Paleta extraída de image_22aaf7.png y diseño de image_21ab15.jpg */
+            --cliq-blue-dark: #05151e;       /* Fondo ultra izquierdo (Barra de iconos) */
+            --cliq-blue-sidebar: #092834;    /* Fondo barra de conversaciones */
+            --cliq-blue-active: #12485c;     /* Fondo de elemento activo */
+            --cliq-accent-blue: #3182ce;     /* Azul de botones de reunión */
+            --cliq-bg-canvas: #f4f7f9;       /* Fondo gris claro del área de trabajo */
+        }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: var(--cliq-bg-canvas);
+            color: #1a202c;
+            height: 100vh;
+            overflow: hidden;
+        }
+
+        /* Scrollbars personalizados */
+        ::-webkit-scrollbar {
+            width: 6px;
+            height: 6px;
+        }
+        ::-webkit-scrollbar-track {
+            background: transparent;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #cbd5e0;
+            border-radius: 4px;
+        }
+        ::-webkit-scrollbar-thumb:hover {
+            background: #a0aec0;
+        }
+
+        /* Estilo para simular desenfoque y profundidad */
+        .glass-panel {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(8px);
+        }
+    </style>
+</head>
+<body class="flex flex-col h-screen select-none">
+
+    <!-- CABECERA SUPERIOR (Top Bar) -->
+    <header class="h-[52px] flex items-center justify-between px-4 border-b border-slate-200 bg-white shadow-sm z-30 shrink-0">
+        <!-- Logo e Icono de Cliq -->
+        <div class="flex items-center gap-2">
+            <div class="flex items-center justify-center bg-[#10a3a4] text-white p-1.5 rounded-lg font-bold shadow-sm">
+                <i class="fa-solid fa-comment-dots text-sm"></i>
+            </div>
+            <span class="font-bold text-lg text-slate-800 tracking-tight">Cliq</span>
+            <!-- Botón de Silenciador de efectos de audio interactivos -->
+            <button onclick="toggleAudioMute()" id="audio-toggle-btn" class="text-slate-400 hover:text-slate-600 ml-2 transition-colors" title="Alternar Sonidos del Prototipo">
+                <i class="fa-solid fa-volume-high text-xs"></i>
+            </button>
+        </div>
+
+        <!-- Buscador central global idéntico a la imagen -->
+        <div class="flex-1 max-w-xl mx-8">
+            <div class="flex items-center bg-slate-100 border border-slate-200 rounded-lg px-3 py-1.5 focus-within:border-blue-400 focus-within:bg-white focus-within:ring-2 focus-within:ring-blue-100 transition-all">
+                <!-- Dropdown de Tipo de Búsqueda -->
+                <div class="relative">
+                    <button onclick="toggleSearchDropdown()" id="search-filter-btn" class="text-xs font-semibold text-slate-500 bg-slate-200 hover:bg-slate-300 px-2 py-0.5 rounded mr-2 flex items-center gap-1">
+                        <span id="search-filter-label">Todo</span> <i class="fa-solid fa-chevron-down text-[8px]"></i>
+                    </button>
+                    <!-- Menú de dropdown de búsqueda -->
+                    <div id="search-dropdown-menu" class="hidden absolute left-0 mt-2 w-40 bg-white border border-slate-200 rounded-lg shadow-lg z-50 text-xs py-1 text-slate-700">
+                        <button type="button" onclick="setSearchFilter('Todo')" class="w-full text-left px-3 py-1.5 hover:bg-slate-50">Todo</button>
+                        <button type="button" onclick="setSearchFilter('Chats')" class="w-full text-left px-3 py-1.5 hover:bg-slate-50">Chats</button>
+                        <button type="button" onclick="setSearchFilter('Canales')" class="w-full text-left px-3 py-1.5 hover:bg-slate-50">Canales</button>
+                        <button type="button" onclick="setSearchFilter('Contactos')" class="w-full text-left px-3 py-1.5 hover:bg-slate-50">Contactos</button>
+                        <button type="button" onclick="setSearchFilter('Archivos')" class="w-full text-left px-3 py-1.5 hover:bg-slate-50">Archivos</button>
+                    </div>
+                </div>
+                <i class="fa-solid fa-magnifying-glass text-slate-400 text-sm mr-2"></i>
+                <input type="text" id="global-search-input" onkeyup="handleGlobalSearch(event)" placeholder="Buscar en todos (ctrl + k)" class="w-full bg-transparent text-sm text-slate-800 outline-none placeholder-slate-400">
+            </div>
+        </div>
+
+        <!-- Botones y Perfil de la Derecha -->
+        <div class="flex items-center gap-3">
+            <!-- Botón azul "+" -->
+            <button onclick="toggleQuickAddMenu()" class="bg-[#0091ff] text-white hover:bg-blue-600 transition-all p-1.5 rounded-lg flex items-center justify-center shadow-sm w-8 h-8 relative" title="Crear algo nuevo">
+                <i class="fa-solid fa-plus text-sm"></i>
+                <!-- Quick Add Popover -->
+                <div id="quick-add-popover" class="hidden absolute right-0 top-10 w-48 bg-white border border-slate-200 text-slate-700 text-xs rounded-xl shadow-xl py-1 z-50">
+                    <button type="button" onclick="createNewChannel()" class="w-full text-left px-4 py-2 hover:bg-slate-50"><i class="fa-solid fa-hashtag mr-2 text-slate-400"></i> Nuevo Canal</button>
+                    <button type="button" onclick="createNewNote()" class="w-full text-left px-4 py-2 hover:bg-slate-50"><i class="fa-solid fa-note-sticky mr-2 text-slate-400"></i> Nueva Nota</button>
+                    <button type="button" onclick="triggerFileUpload()" class="w-full text-left px-4 py-2 hover:bg-slate-50"><i class="fa-solid fa-paperclip mr-2 text-slate-400"></i> Subir Archivo</button>
+                </div>
+            </button>
+            <button onclick="openInviteModal()" class="text-blue-500 hover:text-blue-600 font-semibold text-xs py-1.5 px-3 rounded-lg border border-blue-200 hover:border-blue-400 bg-blue-50/50 transition-all">
+                + Invitar a Usuarios
+            </button>
+            
+            <div class="h-5 w-[1px] bg-slate-200 mx-1"></div>
+            
+            <!-- Iconos Rápidos -->
+            <button onclick="toggleStarredMenu()" class="text-slate-500 hover:text-slate-800 text-sm p-1.5 rounded-lg" title="Favoritos"><i class="fa-solid fa-star"></i></button>
+            <button onclick="showToast('No tienes menciones pendientes.', 'info')" class="text-slate-500 hover:text-slate-800 text-sm p-1.5 rounded-lg relative" title="Menciones">
+                <i class="fa-solid fa-at"></i>
+                <span class="absolute top-1 right-1 w-2 h-2 bg-red-500 rounded-full"></span>
+            </button>
+            <button onclick="showToast('Sección de archivados vacía.', 'info')" class="text-slate-500 hover:text-slate-800 text-sm p-1.5 rounded-lg" title="Archivos"><i class="fa-solid fa-box-archive"></i></button>
+            <button onclick="switchMainTab('calendario')" class="text-slate-500 hover:text-slate-800 text-sm p-1.5 rounded-lg" title="Ver Calendario"><i class="fa-solid fa-calendar-days"></i></button>
+            <button onclick="openMarketplaceModal()" class="text-slate-500 hover:text-slate-800 text-sm p-1.5 rounded-lg" title="Mercado de Apps"><i class="fa-solid fa-store"></i></button>
+
+            <!-- Foto de perfil del usuario con estado interactivo -->
+            <div class="relative cursor-pointer ml-1" id="profile-trigger" onclick="toggleProfileMenu()">
+                <img src="https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=80&q=80" alt="Avatar" class="w-8 h-8 rounded-full border border-slate-300 object-cover">
+                <span class="absolute bottom-0 right-0 w-2.5 h-2.5 rounded-full border-2 border-white bg-amber-500" id="global-status-dot"></span>
+
+                <!-- Menú desplegable de perfil -->
+                <div id="profile-dropdown-menu" class="hidden absolute right-0 mt-2 w-56 bg-white border border-slate-200 rounded-xl shadow-2xl z-50 py-2 text-slate-800">
+                    <div class="px-4 py-2 border-b border-slate-100">
+                        <p class="font-bold text-sm">Usted</p>
+                        <p class="text-[11px] text-slate-500">zenterprisepatam@gmail.com</p>
+                    </div>
+                    <div class="p-2 space-y-1">
+                        <button onclick="setPresenceState('Online', 'bg-green-500')" class="w-full text-left px-3 py-1.5 rounded-lg hover:bg-slate-50 text-xs flex items-center gap-2"><span class="w-2 h-2 bg-green-500 rounded-full"></span> Disponible</button>
+                        <button onclick="setPresenceState('Busy', 'bg-red-500')" class="w-full text-left px-3 py-1.5 rounded-lg hover:bg-slate-50 text-xs flex items-center gap-2"><span class="w-2 h-2 bg-red-500 rounded-full"></span> Ocupado</button>
+                        <button onclick="setPresenceState('Away', 'bg-amber-500')" class="w-full text-left px-3 py-1.5 rounded-lg hover:bg-slate-50 text-xs flex items-center gap-2"><span class="w-2 h-2 bg-amber-500 rounded-full"></span> Ausente</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <!-- CUERPO PRINCIPAL DE LA APLICACIÓN -->
+    <div class="flex flex-1 overflow-hidden">
+        
+        <!-- BARRA LATERAL IZQUIERDA (Menú de navegación y Sub-canales) -->
+        <aside class="w-[300px] flex flex-row shrink-0 text-white shadow-lg relative z-20" style="background-color: var(--cliq-blue-sidebar);">
+            
+            <!-- SUB-COLUMNA A: Los botones interactivos de navegación izquierda -->
+            <div class="w-[85px] flex flex-col justify-between py-4 items-center shrink-0 border-r border-slate-900/40" style="background-color: var(--cliq-blue-dark);">
+                <div class="flex flex-col gap-5 items-center w-full">
+                    <!-- Chats Button -->
+                    <button id="btn-tab-chats" onclick="switchMainTab('chats')" class="nav-tab-btn w-[72px] py-2.5 rounded-xl flex flex-col items-center justify-center text-slate-400 hover:text-white hover:bg-[#133a4d]/50 transition-all relative group">
+                        <i class="fa-solid fa-message text-base mb-1"></i>
+                        <span class="text-[9px] font-semibold uppercase tracking-wider">Chats</span>
+                        <span id="chats-global-badge" class="absolute top-1 right-2 bg-red-500 text-white text-[10px] font-bold rounded-full w-4 h-4 flex items-center justify-center">2</span>
+                    </button>
+
+                    <!-- Canales Button -->
+                    <button id="btn-tab-canales" onclick="switchMainTab('canales')" class="nav-tab-btn w-[72px] py-2.5 rounded-xl flex flex-col items-center justify-center text-slate-400 hover:text-white hover:bg-[#133a4d]/50 transition-all group">
+                        <i class="fa-solid fa-hashtag text-base mb-1"></i>
+                        <span class="text-[9px] font-semibold uppercase tracking-wider">Canales</span>
+                    </button>
+
+                    <!-- Historial Button -->
+                    <button id="btn-tab-historial" onclick="switchMainTab('historial')" class="nav-tab-btn w-[72px] py-2.5 rounded-xl flex flex-col items-center justify-center text-slate-400 hover:text-white hover:bg-[#133a4d]/50 transition-all group">
+                        <i class="fa-solid fa-clock-rotate-left text-base mb-1"></i>
+                        <span class="text-[9px] font-semibold uppercase tracking-wider">Historial</span>
+                    </button>
+
+                    <!-- Archivos Button -->
+                    <button id="btn-tab-archivos" onclick="switchMainTab('archivos')" class="nav-tab-btn w-[72px] py-2.5 rounded-xl flex flex-col items-center justify-center text-slate-400 hover:text-white hover:bg-[#133a4d]/50 transition-all group">
+                        <i class="fa-solid fa-folder-open text-base mb-1"></i>
+                        <span class="text-[9px] font-semibold uppercase tracking-wider">Archivos</span>
+                    </button>
+
+                    <!-- Calendario Button -->
+                    <button id="btn-tab-calendario" onclick="switchMainTab('calendario')" class="nav-tab-btn w-[72px] py-2.5 rounded-xl flex flex-col items-center justify-center text-slate-400 hover:text-white hover:bg-[#133a4d]/50 transition-all group">
+                        <i class="fa-solid fa-calendar-day text-base mb-1"></i>
+                        <span class="text-[9px] font-semibold uppercase tracking-wider">Calen.</span>
+                    </button>
+
+                    <!-- Notas Button -->
+                    <button id="btn-tab-notas" onclick="switchMainTab('notas')" class="nav-tab-btn w-[72px] py-2.5 rounded-xl flex flex-col items-center justify-center text-slate-400 hover:text-white hover:bg-[#133a4d]/50 transition-all group">
+                        <i class="fa-solid fa-note-sticky text-base mb-1"></i>
+                        <span class="text-[9px] font-semibold uppercase tracking-wider">Notas</span>
+                    </button>
+
+                    <!-- Org Button -->
+                    <button id="btn-tab-org" onclick="switchMainTab('org')" class="nav-tab-btn w-[72px] py-2.5 rounded-xl flex flex-col items-center justify-center text-slate-400 hover:text-white hover:bg-[#133a4d]/50 transition-all group">
+                        <i class="fa-solid fa-sitemap text-base mb-1"></i>
+                        <span class="text-[9px] font-semibold uppercase tracking-wider">Org</span>
+                    </button>
+                </div>
+
+                <!-- Configuración inferior (Ajustes) -->
+                <button id="btn-tab-settings" onclick="switchMainTab('settings')" class="nav-tab-btn w-[72px] py-2.5 rounded-xl flex flex-col items-center justify-center text-slate-400 hover:text-white hover:bg-[#133a4d]/50 transition-all" title="Ajustes de Zoho Cliq">
+                    <i class="fa-solid fa-gear text-base mb-1"></i>
+                    <span class="text-[9px] font-semibold uppercase tracking-wider">Ajustes</span>
+                </button>
+            </div>
+
+            <!-- SUB-COLUMNA B: Listados de conversaciones, anclas y toggle de Trabajo Remoto -->
+            <div class="flex-1 flex flex-col overflow-hidden">
+                <!-- Header de "Trabajo remoto" -->
+                <div class="p-4 border-b border-slate-900/20 bg-slate-900/10">
+                    <div class="flex items-center justify-between mb-1">
+                        <button onclick="switchMainTab('dashboard')" class="text-white hover:text-slate-200 font-bold text-sm tracking-wide flex items-center gap-1.5 transition-colors">
+                            <i class="fa-solid fa-house-laptop text-xs text-sky-400"></i> Trabajo remoto
+                        </button>
+                        <!-- Toggle interactivo -->
+                        <label class="relative inline-flex items-center cursor-pointer">
+                            <input type="checkbox" id="remote-work-toggle" checked class="sr-only peer" onchange="toggleRemoteWork(this.checked)">
+                            <div class="w-8 h-4 bg-slate-700 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-3 after:w-3 after:transition-all peer-checked:bg-emerald-500"></div>
+                        </label>
+                    </div>
+                </div>
+
+                <!-- Lista de conversaciones (Scrollable) -->
+                <div class="flex-1 overflow-y-auto px-2 py-3 space-y-4">
+                    <!-- Mis anclas -->
+                    <div>
+                        <div class="flex items-center justify-between px-2 mb-1.5">
+                            <span class="text-[10px] font-bold text-slate-400 uppercase tracking-wider">Mis anclas</span>
+                            <button onclick="triggerAnchorsMenu(event)" class="text-xs text-slate-400 hover:text-white"><i class="fa-solid fa-ellipsis"></i></button>
+                        </div>
+                        <p class="text-[11px] text-slate-500 px-2 italic" id="empty-anchors-text">Mantenga a mano sus chats favoritos marcándolos con estrella.</p>
+                        <div class="space-y-[1px]" id="anchors-list-container"></div>
+                    </div>
+
+                    <!-- Conversaciones principales -->
+                    <div>
+                        <div class="flex items-center justify-between px-2 mb-1.5">
+                            <span class="text-[10px] font-bold text-slate-400 uppercase tracking-wider">Conversaciones</span>
+                            <div class="flex items-center gap-2">
+                                <button onclick="triggerConversationsMenu(event)" class="text-slate-400 hover:text-white text-xs"><i class="fa-solid fa-ellipsis"></i></button>
+                                <button onclick="openNewChatModal()" class="text-slate-400 hover:text-white text-xs" title="Iniciar Conversación"><i class="fa-solid fa-plus"></i></button>
+                            </div>
+                        </div>
+                        
+                        <div class="space-y-[1px]" id="sidebar-chats-list">
+                            <!-- Taz -->
+                            <div id="side-item-taz" class="flex items-center justify-between rounded-lg px-2 py-1.5 cursor-pointer hover:bg-[#12485c]/40 group transition-all" onclick="openDirectChat('taz')">
+                                <div class="flex items-center gap-2">
+                                    <div class="relative w-7 h-7">
+                                        <img src="https://images.unsplash.com/photo-1570295999919-56ceb5ecca61?auto=format&fit=crop&w=80&q=80" alt="Taz" class="w-full h-full rounded-full object-cover">
+                                        <span class="absolute bottom-0 right-0 w-2 h-2 rounded-full bg-green-500 border border-slate-900"></span>
+                                    </div>
+                                    <span class="text-xs text-slate-200 group-hover:text-white font-medium">Taz</span>
+                                </div>
+                                <span class="bg-red-500 text-white text-[10px] font-bold rounded-full w-4 h-4 flex items-center justify-center" id="badge-side-taz">1</span>
+                            </div>
+
+                            <!-- Projects Bot -->
+                            <div id="side-item-projects-bot" class="flex items-center justify-between rounded-lg px-2 py-1.5 cursor-pointer hover:bg-[#12485c]/40 group transition-all" onclick="openDirectChat('projects-bot')">
+                                <div class="flex items-center gap-2">
+                                    <div class="relative w-7 h-7">
+                                        <div class="w-full h-full rounded-full bg-indigo-600 flex items-center justify-center text-[10px] font-bold text-white"><i class="fa-solid fa-robot"></i></div>
+                                        <span class="absolute bottom-0 right-0 w-2 h-2 rounded-full bg-green-500 border border-slate-900"></span>
+                                    </div>
+                                    <span class="text-xs text-slate-200 group-hover:text-white font-medium">Projects Bot</span>
+                                </div>
+                                <span class="bg-red-500 text-white text-[10px] font-bold rounded-full w-4 h-4 flex items-center justify-center" id="badge-side-projects-bot">1</span>
+                            </div>
+
+                            <!-- Announcements -->
+                            <div id="side-item-announcements" class="flex items-center justify-between rounded-lg px-2 py-1.5 cursor-pointer hover:bg-[#12485c]/40 group transition-all" onclick="openDirectChat('announcements')">
+                                <div class="flex items-center gap-2">
+                                    <span class="text-slate-400 font-bold text-xs pl-2">#</span>
+                                    <span class="text-xs text-slate-200 group-hover:text-white font-medium">announcements</span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <button class="w-full text-left px-2 py-1 text-[11px] text-sky-400 hover:underline font-semibold mt-2" onclick="switchMainTab('chats')">
+                            mostrar todo
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </aside>
+
+        <!-- PANEL DE CONTENIDO DINÁMICO (Cambia según la pestaña seleccionada) -->
+        <main class="flex-1 overflow-hidden flex flex-col h-full relative" id="main-content-view">
+            
+            <!-- PESTAÑA 1: TRABAJO REMOTO (DASHBOARD) - ACTIVO POR DEFECTO -->
+            <div id="tab-view-dashboard" class="flex-1 flex flex-col overflow-y-auto w-full">
+                
+                <!-- Sub-cabecera de Control de Estado de Teletrabajo -->
+                <section class="bg-white border-b border-slate-200 py-3 px-6 flex flex-wrap gap-4 items-center justify-between shrink-0">
+                    <div class="flex items-center gap-5">
+                        <div class="flex items-center gap-2 border-r border-slate-200 pr-4">
+                            <span class="text-xs font-semibold text-slate-500">Transmisión de vídeo en vivo:</span>
+                            <button onclick="triggerLiveVideo()" class="p-1.5 rounded-lg border border-slate-200 hover:border-slate-300 hover:bg-slate-50 text-slate-600 transition-all shadow-sm" title="Transmitir vídeo en directo">
+                                <i class="fa-solid fa-video text-xs"></i>
+                            </button>
+                        </div>
+                        
+                        <!-- Contenedor Estado -->
+                        <div class="flex items-center gap-2">
+                            <span class="text-xs font-semibold text-slate-500">Estado:</span>
+                            <div class="flex items-center gap-1.5">
+                                <button id="presence-btn-online" onclick="setPresenceState('Online', 'bg-green-500')" class="w-7 h-7 rounded-full border border-slate-200 flex items-center justify-center bg-emerald-50 text-emerald-600 hover:bg-emerald-100 transition-all" title="En pantalla (Disponible)"><i class="fa-solid fa-desktop text-xs"></i></button>
+                                <button id="presence-btn-busy" onclick="setPresenceState('Busy', 'bg-red-500')" class="w-7 h-7 rounded-full border border-slate-200 flex items-center justify-center bg-red-50 text-red-600 hover:bg-red-100 transition-all" title="Enfocado (Ocupado)"><i class="fa-solid fa-crosshairs text-xs"></i></button>
+                                
+                                <button id="pill-timer-60" onclick="startStatusTimer(60, 'Mesa de Trabajo')" class="text-[10px] font-semibold text-amber-700 bg-amber-50 border border-amber-200 rounded-full px-2.5 py-1 hover:bg-amber-100 transition-all flex items-center gap-1">
+                                    <i class="fa-solid fa-mug-hot text-[10px]"></i> for 60 min
+                                </button>
+                                <button id="pill-timer-15-coffee" onclick="startStatusTimer(15, 'Café')" class="text-[10px] font-semibold text-amber-700 bg-amber-50 border border-amber-200 rounded-full px-2.5 py-1 hover:bg-amber-100 transition-all flex items-center gap-1">
+                                    <i class="fa-solid fa-cookie text-[10px]"></i> for 15 min
+                                </button>
+                                <button id="pill-timer-15-silent" onclick="startSilenceTimer(15)" class="text-[10px] font-semibold text-rose-700 bg-rose-50 border border-rose-200 rounded-full px-2.5 py-1 hover:bg-rose-100 transition-all flex items-center gap-1">
+                                    <i class="fa-solid fa-bell-slash text-[10px]"></i> for 15 min
+                                </button>
+                            </div>
+                        </div>
+
+                        <!-- Estado de temporizador de presencia activo -->
+                        <div id="active-timer-display" class="hidden text-xs text-amber-600 bg-amber-50 border border-amber-200 rounded-lg px-3 py-1 flex items-center gap-2 animate-pulse">
+                            <span id="timer-display-text">☕ Tomando Café: 15:00</span>
+                            <button onclick="cancelStatusTimer()" class="text-amber-800 hover:text-red-500"><i class="fa-solid fa-xmark"></i></button>
+                        </div>
+                    </div>
+
+                    <!-- Botón de Entrada y Reloj -->
+                    <div class="flex items-center gap-3">
+                        <div class="text-right flex flex-col justify-center">
+                            <span class="text-[10px] text-slate-400 font-bold uppercase tracking-wider">Tiempo transcurrido</span>
+                            <span class="text-sm font-semibold text-slate-700 font-mono" id="check-in-timer">00:00:00</span>
+                        </div>
+                        <button onclick="toggleCheckIn()" id="btn-check-in" class="border border-emerald-500 text-emerald-600 hover:bg-emerald-50 font-bold text-xs px-4 py-2 rounded-lg transition-all shadow-sm">
+                            Registrar hora de entrada
+                        </button>
+                        <button onclick="dismissCheckInBar()" class="text-slate-400 hover:text-slate-600 text-xs p-1" title="Cerrar barra"><i class="fa-solid fa-xmark"></i></button>
+                    </div>
+                </section>
+
+                <!-- Área Central del Dashboard -->
+                <section class="p-6 max-w-7xl w-full mx-auto space-y-6 flex-1">
+                    
+                    <!-- Barra de Acciones de Reuniones -->
+                    <div class="flex flex-wrap gap-4 items-center justify-between bg-white border border-slate-200/80 rounded-xl p-5 shadow-sm">
+                        <div class="flex items-center gap-2">
+                            <span class="text-lg font-bold text-slate-800" id="current-workspace-label">zenterprise (1)</span>
+                            <button onclick="toggleWorkspaceDropdown(event)" class="text-slate-400 hover:text-slate-700 text-xs"><i class="fa-solid fa-chevron-down"></i></button>
+                            
+                            <!-- Dropdown de Espacio de Trabajo -->
+                            <div id="workspace-dropdown-menu" class="hidden absolute mt-2 w-48 bg-white border border-slate-200 rounded-lg shadow-lg z-50 text-xs py-1">
+                                <button onclick="selectWorkspace('zenterprise')" class="w-full text-left px-4 py-2 hover:bg-slate-50 font-semibold text-slate-800">zenterprise (1)</button>
+                                <button onclick="selectWorkspace('Soporte')" class="w-full text-left px-4 py-2 hover:bg-slate-50 text-slate-600">Soporte TI</button>
+                                <button onclick="selectWorkspace('Desarrollo')" class="w-full text-left px-4 py-2 hover:bg-slate-50 text-slate-600">Desarrollo Core</button>
+                            </div>
+                        </div>
+                        
+                        <div class="flex items-center gap-3">
+                            <button onclick="launchMeeting()" class="bg-[#0091ff] hover:bg-blue-600 text-white font-semibold text-xs px-4 py-2.5 rounded-lg flex items-center gap-2 transition-all shadow-sm">
+                                <i class="fa-solid fa-video"></i> Iniciar reunión ahora <i class="fa-solid fa-chevron-down text-[10px]"></i>
+                            </button>
+                            <button onclick="scheduleMeetingModal()" class="border border-blue-500 text-blue-500 hover:bg-blue-50 font-semibold text-xs px-4 py-2.5 rounded-lg flex items-center gap-2 transition-all">
+                                <i class="fa-solid fa-calendar"></i> Programar reunión
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Input de búsqueda de miembros -->
+                    <div class="relative max-w-md">
+                        <i class="fa-solid fa-magnifying-glass text-slate-400 absolute left-3 top-3.5 text-sm"></i>
+                        <input type="text" id="member-search" oninput="filterDashboardMembers()" placeholder="Buscar miembros de departamento" class="w-full bg-white border border-slate-200 rounded-xl pl-9 pr-4 py-2.5 text-sm outline-none shadow-sm focus:border-blue-400 focus:ring-1 focus:ring-blue-100 transition-all">
+                    </div>
+
+                    <!-- Columnas de Colaboradores (3-Column Layout idéntico a la imagen) -->
+                    <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+                        
+                        <!-- Columna 1: En el trabajo -->
+                        <div class="bg-white border border-slate-200 rounded-xl shadow-sm flex flex-col h-[420px]">
+                            <div class="p-4 border-b border-slate-100 flex items-center justify-between">
+                                <span class="font-bold text-sm text-slate-800">En el trabajo (<span id="count-at-work">0</span>)</span>
+                                <i class="fa-solid fa-laptop-code text-slate-400"></i>
+                            </div>
+                            <div class="p-4 flex-1 overflow-y-auto space-y-3" id="col-at-work">
+                                <div class="text-center py-10 text-slate-400 text-xs flex flex-col items-center justify-center h-full" id="empty-at-work-msg">
+                                    <i class="fa-solid fa-circle-nodes text-3xl mb-2 text-slate-200"></i>
+                                    Actualmente, todos ellos están desconectados.
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Columna 2: Ausente -->
+                        <div class="bg-white border border-slate-200 rounded-xl shadow-sm flex flex-col h-[420px]">
+                            <div class="p-4 border-b border-slate-100 flex items-center justify-between">
+                                <span class="font-bold text-sm text-slate-800">Ausente (<span id="count-away">1</span>)</span>
+                                <span class="text-xs text-slate-400">Out · <span id="count-away-out">1</span></span>
+                            </div>
+                            <div class="p-4 flex-1 overflow-y-auto space-y-3" id="col-away">
+                                <!-- La tarjeta se alimenta dinámicamente -->
+                            </div>
+                        </div>
+
+                        <!-- Columna 3: Reuniones -->
+                        <div class="bg-white border border-slate-200 rounded-xl shadow-sm flex flex-col h-[420px] justify-between">
+                            <div>
+                                <div class="p-4 border-b border-slate-100 flex items-center justify-between">
+                                    <span class="font-bold text-sm text-slate-800">Reuniones</span>
+                                    <i class="fa-solid fa-video text-slate-400"></i>
+                                </div>
+                                <div class="p-6 text-center text-slate-400 text-xs flex flex-col items-center justify-center py-20" id="meetings-placeholder">
+                                    <i class="fa-regular fa-calendar-times text-4xl text-slate-200 mb-3"></i>
+                                    No hay reuniones en curso o programadas.
+                                </div>
+                                <div class="hidden p-4 space-y-3" id="meetings-list-container">
+                                    <!-- Reuniones dinámicas -->
+                                </div>
+                            </div>
+                            
+                            <div class="p-4 bg-slate-50 border-t border-slate-100 flex items-center justify-between text-xs rounded-b-xl">
+                                <span class="text-slate-500">Mis reuniones recientes</span>
+                                <button onclick="switchMainTab('historial')" class="text-blue-500 hover:underline font-semibold">Ver historial</button>
+                            </div>
+                        </div>
+
+                    </div>
+
+                </section>
+            </div>
+
+            <!-- PESTAÑA 2: CHATS -->
+            <div id="tab-view-chats" class="hidden flex-1 flex flex-col h-full bg-white">
+                <!-- Cabecera de Conversaciones -->
+                <header class="h-[64px] border-b border-slate-200 px-6 flex items-center justify-between shrink-0">
+                    <div class="flex items-center gap-3">
+                        <span class="text-base font-bold text-slate-800" id="chat-active-title">#announcements</span>
+                        <span class="text-xs bg-blue-50 border border-blue-200 text-blue-600 px-2.5 py-0.5 rounded-full" id="chat-member-badge">Sala General</span>
+                    </div>
+                    <div class="flex items-center gap-4 text-slate-500">
+                        <button class="hover:text-slate-800 transition-all" onclick="launchMeeting()" title="Llamada de voz"><i class="fa-solid fa-phone"></i></button>
+                        <button class="hover:text-slate-800 transition-all" onclick="launchMeeting()" title="Videollamada"><i class="fa-solid fa-video"></i></button>
+                        <button class="hover:text-slate-800 transition-all" onclick="focusChatSearch()" title="Buscar en Chat"><i class="fa-solid fa-magnifying-glass"></i></button>
+                    </div>
+                </header>
+
+                <!-- Área de Mensajes -->
+                <div class="flex-1 overflow-y-auto p-6 space-y-4 flex flex-col bg-slate-50" id="chat-messages-box">
+                    <!-- Mensajes inyectados dinámicamente -->
+                </div>
+
+                <!-- Input Box -->
+                <footer class="p-4 bg-white border-t border-slate-200">
+                    <form id="active-chat-form" class="flex items-end gap-3 max-w-4xl mx-auto">
+                        <div class="flex-1 rounded-xl p-2 flex flex-col gap-1.5 border border-slate-200 bg-slate-50 focus-within:border-blue-400 focus-within:bg-white transition-all">
+                            <textarea id="active-chat-input" rows="1" placeholder="Escribe un mensaje..." class="w-full bg-transparent resize-none outline-none text-slate-800 placeholder-slate-400 px-2 text-sm max-h-32" onkeydown="handleChatSubmit(event)"></textarea>
+                            <div class="flex items-center justify-between px-2 pt-1.5 border-t border-slate-200/50 text-slate-400">
+                                <div class="flex items-center gap-3 text-sm">
+                                    <button type="button" class="hover:text-slate-700" title="Formato"><i class="fa-solid fa-font"></i></button>
+                                    <button type="button" class="hover:text-slate-700" title="Emojis"><i class="fa-solid fa-face-smile"></i></button>
+                                    <button type="button" onclick="triggerFileUpload()" class="hover:text-slate-700" title="Adjuntar"><i class="fa-solid fa-paperclip"></i></button>
+                                    <button type="button" onclick="showToast('Entrada de voz no disponible en prototipo.', 'warning')" class="hover:text-slate-700" title="Audio"><i class="fa-solid fa-microphone"></i></button>
+                                </div>
+                                <span class="text-[10px] text-slate-400">Enter para enviar</span>
+                            </div>
+                        </div>
+                        <button type="submit" class="bg-blue-500 text-white w-10 h-10 rounded-xl flex items-center justify-center hover:bg-blue-600 transition-all shadow-md shrink-0">
+                            <i class="fa-solid fa-paper-plane text-sm"></i>
+                        </button>
+                    </form>
+                </footer>
+            </div>
+
+            <!-- PESTAÑA 3: CANALES -->
+            <div id="tab-view-canales" class="hidden flex-1 p-6 overflow-y-auto bg-slate-50">
+                <div class="max-w-4xl mx-auto space-y-6">
+                    <div class="flex items-center justify-between border-b border-slate-200 pb-4">
+                        <div>
+                            <h2 class="text-xl font-bold text-slate-800">Canales de la Organización</h2>
+                            <p class="text-sm text-slate-500">Únete a canales compartidos del equipo para estar sincronizado.</p>
+                        </div>
+                        <button onclick="createNewChannel()" class="bg-blue-500 text-white font-semibold text-xs px-3.5 py-2 rounded-lg hover:bg-blue-600 transition-all shadow-sm">
+                            + Crear Canal
+                        </button>
+                    </div>
+                    
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4" id="channels-directory-grid">
+                        <!-- Canales de la organización -->
+                    </div>
+                </div>
+            </div>
+
+            <!-- PESTAÑA 4: HISTORIAL -->
+            <div id="tab-view-historial" class="hidden flex-1 p-6 overflow-y-auto bg-slate-50">
+                <div class="max-w-4xl mx-auto space-y-6">
+                    <div class="border-b border-slate-200 pb-4">
+                        <h2 class="text-xl font-bold text-slate-800">Historial de Comunicaciones</h2>
+                        <p class="text-sm text-slate-500">Consulta las llamadas y salas de reuniones anteriores.</p>
+                    </div>
+
+                    <div class="bg-white rounded-xl border border-slate-200 shadow-sm overflow-hidden">
+                        <table class="w-full text-left border-collapse text-xs">
+                            <thead>
+                                <tr class="bg-slate-50 border-b border-slate-200 text-slate-500 uppercase font-semibold">
+                                    <th class="p-3">Evento</th>
+                                    <th class="p-3">Organizador / Destinatario</th>
+                                    <th class="p-3">Fecha</th>
+                                    <th class="p-3">Duración</th>
+                                    <th class="p-3">Acciones</th>
+                                </tr>
+                            </thead>
+                            <tbody id="history-rows-container">
+                                <!-- Filas de historial dinámicas -->
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+
+            <!-- PESTAÑA 5: ARCHIVOS -->
+            <div id="tab-view-archivos" class="hidden flex-1 p-6 overflow-y-auto bg-slate-50">
+                <div class="max-w-4xl mx-auto space-y-6">
+                    <div class="flex items-center justify-between border-b border-slate-200 pb-4">
+                        <div>
+                            <h2 class="text-xl font-bold text-slate-800">Archivos y Compartidos</h2>
+                            <p class="text-sm text-slate-500">Todos los documentos y multimedia compartidos en tus chats.</p>
+                        </div>
+                        <button onclick="triggerFileUpload()" class="bg-blue-500 text-white font-semibold text-xs px-3.5 py-2 rounded-lg hover:bg-blue-600 transition-all shadow-sm">
+                            Subir Archivo
+                        </button>
+                    </div>
+
+                    <!-- Grid de tipos de archivos -->
+                    <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                        <div class="bg-white p-4 rounded-xl border border-slate-200 shadow-sm flex items-center gap-3">
+                            <div class="w-10 h-10 rounded-lg bg-blue-100 text-blue-600 flex items-center justify-center text-lg"><i class="fa-solid fa-file-pdf"></i></div>
+                            <div>
+                                <h4 class="font-bold text-sm text-slate-800">Documentos</h4>
+                                <p class="text-xs text-slate-400" id="doc-files-count">4 archivos</p>
+                            </div>
+                        </div>
+                        <div class="bg-white p-4 rounded-xl border border-slate-200 shadow-sm flex items-center gap-3">
+                            <div class="w-10 h-10 rounded-lg bg-emerald-100 text-emerald-600 flex items-center justify-center text-lg"><i class="fa-solid fa-image"></i></div>
+                            <div>
+                                <h4 class="font-bold text-sm text-slate-800">Imágenes</h4>
+                                <p class="text-xs text-slate-400">12 imágenes</p>
+                            </div>
+                        </div>
+                        <div class="bg-white p-4 rounded-xl border border-slate-200 shadow-sm flex items-center gap-3">
+                            <div class="w-10 h-10 rounded-lg bg-amber-100 text-amber-600 flex items-center justify-center text-lg"><i class="fa-solid fa-paperclip"></i></div>
+                            <div>
+                                <h4 class="font-bold text-sm text-slate-800">Otros Adjuntos</h4>
+                                <p class="text-xs text-slate-400">2 archivos</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Lista de archivos recientes -->
+                    <div class="bg-white rounded-xl border border-slate-200 shadow-sm p-4 space-y-3">
+                        <h3 class="font-bold text-xs text-slate-400 uppercase tracking-wider mb-2">Subidas recientes</h3>
+                        <div class="space-y-2" id="files-list-container">
+                            <!-- Archivos dinámicos -->
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- PESTAÑA 6: CALENDARIO -->
+            <div id="tab-view-calendario" class="hidden flex-1 p-6 overflow-y-auto bg-slate-50">
+                <div class="max-w-4xl mx-auto space-y-6">
+                    <div class="border-b border-slate-200 pb-4">
+                        <h2 class="text-xl font-bold text-slate-800">Calendario de Actividades</h2>
+                        <p class="text-sm text-slate-500">Planifica tus reuniones y mantente al tanto de la agenda.</p>
+                    </div>
+
+                    <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                        <!-- El calendario interactivo -->
+                        <div class="md:col-span-2 bg-white p-5 rounded-xl border border-slate-200 shadow-sm">
+                            <div class="flex items-center justify-between mb-4">
+                                <span class="font-bold text-sm text-slate-800">Mayo 2026</span>
+                                <div class="flex gap-2">
+                                    <button class="p-1 border border-slate-200 rounded hover:bg-slate-50 text-xs"><i class="fa-solid fa-chevron-left"></i></button>
+                                    <button class="p-1 border border-slate-200 rounded hover:bg-slate-50 text-xs"><i class="fa-solid fa-chevron-right"></i></button>
+                                </div>
+                            </div>
+                            <!-- Mini Grid de días -->
+                            <div class="grid grid-cols-7 gap-1 text-center text-[11px] font-semibold text-slate-500 mb-2">
+                                <div>D</div><div>L</div><div>M</div><div>M</div><div>J</div><div>V</div><div>S</div>
+                            </div>
+                            <div class="grid grid-cols-7 gap-1 text-center text-xs text-slate-700" id="calendar-days-grid">
+                                <!-- Generado por JS -->
+                            </div>
+                        </div>
+
+                        <!-- Lista de eventos de agenda del día -->
+                        <div class="bg-white p-5 rounded-xl border border-slate-200 shadow-sm space-y-4">
+                            <h3 class="font-bold text-sm text-slate-800">Agenda del Día</h3>
+                            <div class="space-y-3" id="calendar-events-container">
+                                <!-- Eventos dinámicos -->
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- PESTAÑA 7: NOTAS -->
+            <div id="tab-view-notas" class="hidden flex-1 p-6 overflow-y-auto bg-slate-50">
+                <div class="max-w-4xl mx-auto space-y-6">
+                    <div class="flex items-center justify-between border-b border-slate-200 pb-4">
+                        <div>
+                            <h2 class="text-xl font-bold text-slate-800">Mis Notas Rápidas</h2>
+                            <p class="text-sm text-slate-500">Un block de notas privado e inmediato para tus apuntes.</p>
+                        </div>
+                        <button onclick="createNewNote()" class="bg-blue-500 text-white font-semibold text-xs px-3.5 py-2 rounded-lg hover:bg-blue-600 transition-all shadow-sm">
+                            + Nueva Nota
+                        </button>
+                    </div>
+
+                    <!-- Grid de notas -->
+                    <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4" id="notes-grid-container">
+                        <!-- Notas dinámicas -->
+                    </div>
+                </div>
+            </div>
+
+            <!-- PESTAÑA 8: ORG (DIRECTORIO DE EMPLEADOS) -->
+            <div id="tab-view-org" class="hidden flex-1 p-6 overflow-y-auto bg-slate-50">
+                <div class="max-w-4xl mx-auto space-y-6">
+                    <div class="border-b border-slate-200 pb-4">
+                        <h2 class="text-xl font-bold text-slate-800">Directorio de la Organización</h2>
+                        <p class="text-sm text-slate-500">Conoce y localiza a los integrantes de la organización zenterprise.</p>
+                    </div>
+
+                    <!-- Grid de miembros -->
+                    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4" id="org-members-grid">
+                        <!-- Miembros dinámicos -->
+                    </div>
+                </div>
+            </div>
+
+            <!-- PESTAÑA 9: AJUSTES -->
+            <div id="tab-view-settings" class="hidden flex-1 p-6 overflow-y-auto bg-slate-50">
+                <div class="max-w-4xl mx-auto bg-white border border-slate-200 rounded-2xl shadow-sm p-6 space-y-6">
+                    <div class="border-b border-slate-100 pb-4">
+                        <h2 class="text-lg font-bold text-slate-800">Ajustes Generales de Zoho Cliq</h2>
+                        <p class="text-xs text-slate-500">Personaliza tus preferencias de notificación, audio y privacidad de zenterprise.</p>
+                    </div>
+
+                    <div class="space-y-4 text-xs">
+                        <div class="flex items-center justify-between p-3 bg-slate-50 rounded-lg">
+                            <div>
+                                <h4 class="font-bold text-slate-800">Notificaciones de Escritorio</h4>
+                                <p class="text-slate-400">Mostrar banners para nuevos mensajes directos o menciones.</p>
+                            </div>
+                            <input type="checkbox" checked class="w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 rounded focus:ring-blue-500">
+                        </div>
+
+                        <div class="flex items-center justify-between p-3 bg-slate-50 rounded-lg">
+                            <div>
+                                <h4 class="font-bold text-slate-800">Efectos de Sonido Integrados</h4>
+                                <p class="text-slate-400">Permitir la reproducción de alertas de sonido para eventos de chat y llamadas.</p>
+                            </div>
+                            <input type="checkbox" id="sounds-settings-checkbox" checked onchange="toggleAudioMuteFromCheckbox(this.checked)" class="w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 rounded focus:ring-blue-500">
+                        </div>
+
+                        <div class="flex items-center justify-between p-3 bg-slate-50 rounded-lg">
+                            <div>
+                                <h4 class="font-bold text-slate-800">Modo de Ahorro de Energía</h4>
+                                <p class="text-slate-400">Limita las animaciones del canvas para ahorrar batería en portátiles.</p>
+                            </div>
+                            <input type="checkbox" class="w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 rounded focus:ring-blue-500">
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+        </main>
+    </div>
+
+    <!-- MODAL: SIMULADOR DE CONFERENCIAS Y VIDEO CON RECEPTOR CANVAS ANIMADO -->
+    <div id="meeting-modal" class="hidden fixed inset-0 bg-slate-950/80 backdrop-blur-sm flex items-center justify-center z-50 p-4">
+        <div class="bg-slate-900 border border-slate-800 text-white rounded-2xl max-w-2xl w-full overflow-hidden shadow-2xl">
+            <!-- Header de llamada -->
+            <div class="p-4 border-b border-slate-800 flex items-center justify-between bg-slate-950">
+                <span class="font-bold text-xs text-slate-400 uppercase tracking-widest flex items-center gap-2">
+                    <span class="w-2.5 h-2.5 rounded-full bg-red-500 animate-pulse"></span> Simulador de Conferencia Cliq
+                </span>
+                <button onclick="closeMeeting()" class="text-slate-400 hover:text-white"><i class="fa-solid fa-xmark"></i></button>
+            </div>
+            <!-- Cuerpo de videollamada -->
+            <div class="p-4 flex flex-col items-center justify-center space-y-4 relative h-[360px] bg-gradient-to-b from-slate-900 to-slate-950">
+                <!-- Canvas para simulación real de webcam/señal animada -->
+                <canvas id="camera-noise-canvas" class="w-full h-full rounded-xl bg-black border border-slate-850 absolute top-0 left-0 opacity-40 z-0"></canvas>
+                
+                <div class="z-10 w-24 h-24 rounded-full border-4 border-blue-500 overflow-hidden shadow-lg animate-bounce">
+                    <img src="https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=120&q=80" alt="Tú" class="w-full h-full object-cover">
+                </div>
+                <div class="z-10 text-center">
+                    <h3 class="font-bold text-lg" id="meeting-type-label">Transmitiendo en Vivo...</h3>
+                    <p class="text-xs text-slate-400 mt-1">Sala de conferencia de zenterprise</p>
+                    <p class="text-[11px] text-emerald-400 font-mono mt-2" id="meeting-duration-timer">00:00</p>
+                </div>
+            </div>
+            <!-- Controles de llamada -->
+            <div class="p-4 bg-slate-950 border-t border-slate-800 flex items-center justify-center gap-6">
+                <button onclick="toggleMic()" id="btn-mic" class="w-11 h-11 bg-slate-800 hover:bg-slate-700 text-white rounded-full flex items-center justify-center transition-all" title="Silenciar Micrófono"><i class="fa-solid fa-microphone"></i></button>
+                <button onclick="toggleVideoFeed()" id="btn-video" class="w-11 h-11 bg-slate-800 hover:bg-slate-700 text-white rounded-full flex items-center justify-center transition-all" title="Cerrar Cámara"><i class="fa-solid fa-video"></i></button>
+                <button onclick="toggleScreenShare()" id="btn-screen" class="w-11 h-11 bg-slate-800 hover:bg-slate-700 text-white rounded-full flex items-center justify-center transition-all" title="Compartir pantalla"><i class="fa-solid fa-desktop"></i></button>
+                <button onclick="closeMeeting()" class="w-14 h-11 bg-red-600 hover:bg-red-500 text-white rounded-2xl flex items-center justify-center transition-all shadow-md" title="Finalizar llamada"><i class="fa-solid fa-phone-slash"></i></button>
+            </div>
+        </div>
+    </div>
+
+    <!-- MODAL: AGENDADOR DE REUNIONES -->
+    <div id="schedule-modal" class="hidden fixed inset-0 bg-slate-950/50 backdrop-blur-sm flex items-center justify-center z-50 p-4">
+        <div class="bg-white text-slate-800 rounded-2xl max-w-md w-full overflow-hidden shadow-2xl border border-slate-200">
+            <div class="p-4 border-b border-slate-100 flex items-center justify-between bg-slate-50">
+                <span class="font-bold text-sm text-slate-800">Programar Reunión en Cliq</span>
+                <button onclick="closeSchedule()" class="text-slate-400 hover:text-slate-600"><i class="fa-solid fa-xmark"></i></button>
+            </div>
+            <form id="schedule-form" class="p-6 space-y-4 text-xs" onsubmit="saveScheduledMeeting(event)">
+                <div>
+                    <label class="block font-bold text-slate-500 mb-1">Título de la Reunión</label>
+                    <input type="text" required id="sch-title" placeholder="Ej. Sync quincenal de marketing" class="w-full bg-slate-50 border border-slate-200 rounded-lg p-2.5 outline-none focus:border-blue-400">
+                </div>
+                <div class="grid grid-cols-2 gap-3">
+                    <div>
+                        <label class="block font-bold text-slate-500 mb-1">Hora</label>
+                        <input type="time" required id="sch-time" class="w-full bg-slate-50 border border-slate-200 rounded-lg p-2.5 outline-none focus:border-blue-400">
+                    </div>
+                    <div>
+                        <label class="block font-bold text-slate-500 mb-1">Duración (min)</label>
+                        <input type="number" required id="sch-duration" value="30" class="w-full bg-slate-50 border border-slate-200 rounded-lg p-2.5 outline-none focus:border-blue-400">
+                    </div>
+                </div>
+                <div class="flex items-center justify-end gap-3 pt-2">
+                    <button type="button" onclick="closeSchedule()" class="px-4 py-2 rounded-lg font-semibold border border-slate-200 hover:bg-slate-50">Cancelar</button>
+                    <button type="submit" class="px-4 py-2 rounded-lg font-semibold bg-blue-500 text-white hover:bg-blue-600">Agendar</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- MODAL: INVITAR USUARIOS -->
+    <div id="invite-modal" class="hidden fixed inset-0 bg-slate-950/50 backdrop-blur-sm flex items-center justify-center z-50 p-4">
+        <div class="bg-white text-slate-800 rounded-2xl max-w-md w-full overflow-hidden shadow-2xl border border-slate-200">
+            <div class="p-4 border-b border-slate-100 flex items-center justify-between bg-slate-50">
+                <span class="font-bold text-sm text-slate-800">Invitar Colaboradores a zenterprise</span>
+                <button onclick="closeInviteModal()" class="text-slate-400 hover:text-slate-600"><i class="fa-solid fa-xmark"></i></button>
+            </div>
+            <form id="invite-form" class="p-6 space-y-4 text-xs" onsubmit="saveUserInvitation(event)">
+                <div>
+                    <label class="block font-bold text-slate-500 mb-1">Correo Electrónico</label>
+                    <input type="email" required id="inv-email" placeholder="colaborador@zenterprise.com" class="w-full bg-slate-50 border border-slate-200 rounded-lg p-2.5 outline-none focus:border-blue-400">
+                </div>
+                <div>
+                    <label class="block font-bold text-slate-500 mb-1">Nombre Completo</label>
+                    <input type="text" required id="inv-name" placeholder="Juan Pérez" class="w-full bg-slate-50 border border-slate-200 rounded-lg p-2.5 outline-none focus:border-blue-400">
+                </div>
+                <div>
+                    <label class="block font-bold text-slate-500 mb-1">Rol / Departamento</label>
+                    <input type="text" required id="inv-role" placeholder="Frontend Developer" class="w-full bg-slate-50 border border-slate-200 rounded-lg p-2.5 outline-none focus:border-blue-400">
+                </div>
+                <div class="flex items-center justify-end gap-3 pt-2">
+                    <button type="button" onclick="closeInviteModal()" class="px-4 py-2 rounded-lg font-semibold border border-slate-200 hover:bg-slate-50">Cancelar</button>
+                    <button type="submit" class="px-4 py-2 rounded-lg font-semibold bg-blue-500 text-white hover:bg-blue-600">Enviar Invitación</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- MODAL: MERCADO DE APPS (ZOHO MARKETPLACE) -->
+    <div id="marketplace-modal" class="hidden fixed inset-0 bg-slate-950/50 backdrop-blur-sm flex items-center justify-center z-50 p-4">
+        <div class="bg-white text-slate-800 rounded-2xl max-w-2xl w-full overflow-hidden shadow-2xl border border-slate-200">
+            <div class="p-4 border-b border-slate-100 flex items-center justify-between bg-slate-50">
+                <span class="font-bold text-sm text-slate-800"><i class="fa-solid fa-store text-blue-500 mr-2"></i>Zoho Cliq Marketplace</span>
+                <button onclick="closeMarketplaceModal()" class="text-slate-400 hover:text-slate-600"><i class="fa-solid fa-xmark"></i></button>
+            </div>
+            <div class="p-6 grid grid-cols-1 sm:grid-cols-2 gap-4 max-h-[400px] overflow-y-auto">
+                <div class="p-4 border border-slate-100 rounded-xl hover:shadow-md transition-shadow flex gap-3 bg-slate-50/50">
+                    <div class="w-10 h-10 bg-indigo-500 text-white rounded-lg flex items-center justify-center text-lg"><i class="fa-brands fa-github"></i></div>
+                    <div>
+                        <h4 class="font-bold text-xs text-slate-800">Github Integration</h4>
+                        <p class="text-[10px] text-slate-500 mt-1">Recibe notificaciones de commits y pull requests directo en Cliq.</p>
+                        <button onclick="showToast('Integración instalada con éxito.', 'success')" class="text-[10px] font-bold text-blue-500 hover:underline mt-2 inline-block">Instalar</button>
+                    </div>
+                </div>
+                <div class="p-4 border border-slate-100 rounded-xl hover:shadow-md transition-shadow flex gap-3 bg-slate-50/50">
+                    <div class="w-10 h-10 bg-sky-500 text-white rounded-lg flex items-center justify-center text-lg"><i class="fa-brands fa-trello"></i></div>
+                    <div>
+                        <h4 class="font-bold text-xs text-slate-800">Trello Connector</h4>
+                        <p class="text-[10px] text-slate-500 mt-1">Conecta tableros y crea tarjetas directo mediante comandos de chat.</p>
+                        <button onclick="showToast('Integración instalada con éxito.', 'success')" class="text-[10px] font-bold text-blue-500 hover:underline mt-2 inline-block">Instalar</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- CAJA DE NOTIFICACIONES PERSONALIZADAS (Evita alert() nativos) -->
+    <div id="toast-container" class="fixed bottom-6 right-6 space-y-2 z-50"></div>
+
+
+    <script>
+        // CONFIGURACIÓN DE AUDIO SINTETIZADO (Web Audio API)
+        const audioEngine = {
+            muted: false,
+            ctx: null,
+            init() {
+                if (!this.ctx) {
+                    this.ctx = new (window.AudioContext || window.webkitAudioContext)();
+                }
+            },
+            playBeep(freq, duration, type = 'sine') {
+                if (this.muted) return;
+                try {
+                    this.init();
+                    if (this.ctx.state === 'suspended') {
+                        this.ctx.resume();
+                    }
+                    const osc = this.ctx.createOscillator();
+                    const gain = this.ctx.createGain();
+                    osc.type = type;
+                    osc.frequency.setValueAtTime(freq, this.ctx.currentTime);
+                    osc.connect(gain);
+                    gain.connect(this.ctx.destination);
+                    gain.gain.setValueAtTime(0.1, this.ctx.currentTime);
+                    gain.gain.exponentialRampToValueAtTime(0.01, this.ctx.currentTime + duration);
+                    osc.start();
+                    osc.stop(this.ctx.currentTime + duration);
+                } catch(e) {
+                    console.log("Audio no iniciado aún por políticas del navegador");
+                }
+            },
+            playNotification() {
+                this.playBeep(523.25, 0.15, 'triangle');
+                setTimeout(() => this.playBeep(659.25, 0.25, 'triangle'), 100);
+            },
+            playClick() {
+                this.playBeep(440, 0.05, 'sine');
+            }
+        };
+
+        // ESTADO GLOBAL DE LA APLICACIÓN
+        const appState = {
+            activeTab: 'dashboard',
+            isCheckedIn: false,
+            checkInSeconds: 0,
+            checkInInterval: null,
+            presenceStatus: 'offline', // online, busy, away, offline
+            activeTimer: null,
+            activeTimerVal: 0,
+            activeChat: 'announcements',
+            meetingInterval: null,
+            meetingSeconds: 0,
+            isMicMuted: false,
+            isVideoOff: false,
+            isScreenSharing: false,
+            activeSearchFilter: 'Todo',
+            conversations: {
+                'taz': {
+                    name: 'Taz',
+                    avatar: 'https://images.unsplash.com/photo-1570295999919-56ceb5ecca61?auto=format&fit=crop&w=80&q=80',
+                    isChannel: false,
+                    messages: [
+                        { sender: 'Taz', text: 'Hola, ¿pudiste ver el error de consola en el CRM?', time: '09:12 AM', self: false },
+                        { sender: 'Tú', text: 'Hola Taz, sí, era por un campo mal estructurado. Ya quedó resuelto.', time: '09:15 AM', self: true }
+                    ]
+                },
+                'projects-bot': {
+                    name: 'Projects Bot',
+                    avatar: null,
+                    isChannel: false,
+                    messages: [
+                        { sender: 'Projects Bot', text: 'Se ha asignado una nueva tarea: "Revisión estética del prototipo de Zoho Cliq".', time: '10:00 AM', self: false }
+                    ]
+                },
+                'announcements': {
+                    name: '#announcements',
+                    avatar: null,
+                    isChannel: true,
+                    messages: [
+                        { sender: 'Administración', text: 'Bienvenidos al nuevo portal colaborativo de zenterprise.', time: 'Ayer', self: false }
+                    ]
+                }
+            },
+            members: [
+                { id: 1, name: "Maria P.", email: "maria.diseno@zenterprise.com", role: "Diseño UX/UI", status: "online", avatar: "https://images.unsplash.com/photo-1494790108377-be9c29b29330?auto=format&fit=crop&w=100&q=80" },
+                { id: 2, name: "Juan C.", email: "juan.dev@zenterprise.com", role: "Frontend Dev", status: "online", avatar: "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?auto=format&fit=crop&w=100&q=80" },
+                { id: 3, name: "Sofía R.", email: "sofia.mkt@zenterprise.com", role: "Marketing Lead", status: "away", avatar: "https://images.unsplash.com/photo-1544005313-94ddf0286df2?auto=format&fit=crop&w=100&q=80" },
+                { id: 4, name: "Carlos M.", email: "carlos.pm@zenterprise.com", role: "Product Manager", status: "offline", avatar: "https://images.unsplash.com/photo-1500648767791-00dcc994a43e?auto=format&fit=crop&w=100&q=80" }
+            ],
+            scheduledMeetings: [
+                { id: 1, title: "Sync Semanal de Diseño UX/UI", time: "16:00", duration: 30 }
+            ],
+            notes: [
+                { id: 1, text: "Recordar revisar la paleta de colores oscuro de Zoho Cliq antes de la reunión de hoy tarde.", time: "Hace un momento" }
+            ],
+            channels: [
+                { id: 1, name: "general-team", desc: "Canal global de comunicación de la empresa.", members: 12 },
+                { id: 2, name: "diseno-uxui", desc: "Coordinación de interfaces de proyectos Zoho.", members: 5 }
+            ],
+            history: [
+                { id: 1, type: "Llamada Directa", target: "Taz", date: "Hoy, 10:15 AM", duration: "05:22 min" },
+                { id: 2, type: "Video conferencia", target: "zenterprise (Sala Común)", date: "Ayer, 04:30 PM", duration: "45:10 min" }
+            ],
+            files: [
+                { id: 1, name: "mock-up-zoho-screen.png", date: "Ayer, 05:40 PM" }
+            ],
+            starred: []
+        };
+
+        // INICIALIZACIÓN
+        window.onload = function() {
+            renderDashboardMembers();
+            renderActiveChat();
+            renderCalendar();
+            renderOrgMembers();
+            renderChannelsDirectory();
+            renderHistoryRows();
+            renderFilesList();
+            renderNotes();
+            switchMainTab('dashboard');
+            initCanvasNoise();
+            
+            // Iniciar por defecto en ausente según la captura
+            setPresenceState('Away', 'bg-amber-500');
+            showToast("Prototipo de Zoho Cliq cargado. Explora libremente.", "success");
+        };
+
+        // GESTIÓN DE PESTAÑAS (Interconexión completa de la columna izquierda)
+        function switchMainTab(tabId) {
+            audioEngine.playClick();
+            appState.activeTab = tabId;
+
+            const views = [
+                'dashboard', 'chats', 'canales', 'historial', 'archivos', 
+                'calendario', 'notes', 'org', 'settings'
+            ];
+            
+            views.forEach(v => {
+                const el = document.getElementById(`tab-view-${v}`);
+                if (el) el.classList.add('hidden');
+            });
+
+            const tabButtons = document.querySelectorAll('.nav-tab-btn');
+            tabButtons.forEach(btn => {
+                btn.classList.remove('text-white', 'bg-[#12485c]/60');
+                btn.classList.add('text-slate-400');
+            });
+
+            const activeEl = document.getElementById(`tab-view-${tabId}`);
+            if (activeEl) activeEl.classList.remove('hidden');
+
+            const activeBtn = document.getElementById(`btn-tab-${tabId}`);
+            if (activeBtn) {
+                activeBtn.classList.remove('text-slate-400');
+                activeBtn.classList.add('text-white', 'bg-[#12485c]/60');
+            }
+        }
+
+        // REGISTRO DE ENTRADA / SALIDA (Check-In)
+        function toggleCheckIn() {
+            audioEngine.playClick();
+            const btn = document.getElementById('btn-check-in');
+            const timerText = document.getElementById('check-in-timer');
+            
+            if (!appState.isCheckedIn) {
+                // Registrar Entrada
+                appState.isCheckedIn = true;
+                btn.textContent = "Registrar hora de salida";
+                btn.className = "border border-red-500 text-red-600 hover:bg-red-50 font-bold text-xs px-4 py-2 rounded-lg transition-all shadow-sm";
+                
+                // Mueve al usuario de estado
+                setPresenceState('Online', 'bg-green-500');
+
+                // Iniciar Temporizador
+                appState.checkInInterval = setInterval(() => {
+                    appState.checkInSeconds++;
+                    timerText.textContent = formatTimer(appState.checkInSeconds);
+                }, 1000);
+
+                showToast("Entrada registrada. Cronómetro de jornada laboral iniciado.", "success");
+            } else {
+                // Registrar Salida
+                appState.isCheckedIn = false;
+                btn.textContent = "Registrar hora de entrada";
+                btn.className = "border border-emerald-500 text-emerald-600 hover:bg-emerald-50 font-bold text-xs px-4 py-2 rounded-lg transition-all shadow-sm";
+                
+                setPresenceState('Away', 'bg-amber-500');
+
+                // Detener e inicializar temporizador
+                clearInterval(appState.checkInInterval);
+                appState.checkInSeconds = 0;
+                timerText.textContent = "00:00:00";
+
+                showToast("Salida registrada con éxito. ¡Buen descanso!", "warning");
+            }
+
+            renderDashboardMembers();
+        }
+
+        function formatTimer(totalSeconds) {
+            const hrs = Math.floor(totalSeconds / 3600).toString().padStart(2, '0');
+            const mins = Math.floor((totalSeconds % 3600) / 60).toString().padStart(2, '0');
+            const secs = (totalSeconds % 60).toString().padStart(2, '0');
+            return `${hrs}:${mins}:${secs}`;
+        }
+
+        // GESTIÓN DE DROPDOWNS Y ELEMENTOS EMERGENTES INTERACTIVOS
+        function toggleSearchDropdown() {
+            const menu = document.getElementById('search-dropdown-menu');
+            menu.classList.toggle('hidden');
+        }
+
+        function setSearchFilter(filter) {
+            appState.activeSearchFilter = filter;
+            document.getElementById('search-filter-label').textContent = filter;
+            document.getElementById('search-dropdown-menu').classList.add('hidden');
+            showToast(`Buscando por filtro: ${filter}`, "info");
+        }
+
+        function toggleQuickAddMenu() {
+            const menu = document.getElementById('quick-add-popover');
+            menu.classList.toggle('hidden');
+        }
+
+        function toggleProfileMenu() {
+            const menu = document.getElementById('profile-dropdown-menu');
+            menu.classList.toggle('hidden');
+        }
+
+        function toggleWorkspaceDropdown(e) {
+            e.stopPropagation();
+            const menu = document.getElementById('workspace-dropdown-menu');
+            menu.classList.toggle('hidden');
+        }
+
+        function selectWorkspace(name) {
+            document.getElementById('current-workspace-label').textContent = `${name} (1)`;
+            document.getElementById('workspace-dropdown-menu').classList.add('hidden');
+            showToast(`Workspace cambiado a: ${name}`, "success");
+        }
+
+        function dismissCheckInBar() {
+            showToast("Barra de teletrabajo cerrada transitoriamente.", "info");
+        }
+
+        // FILTRADO DE INTEGRANTES DEL DEPARTAMENTO
+        function filterDashboardMembers() {
+            const query = document.getElementById('member-search').value.toLowerCase();
+            const cards = document.querySelectorAll('#col-at-work > div, #col-away > div');
+            
+            cards.forEach(card => {
+                const name = card.querySelector('p.font-bold')?.textContent.toLowerCase() || '';
+                const email = card.querySelector('p.text-slate-400')?.textContent.toLowerCase() || '';
+                if (name.includes(query) || email.includes(query)) {
+                    card.classList.remove('hidden');
+                } else {
+                    card.classList.add('hidden');
+                }
+            });
+        }
+
+        // GESTIÓN DE TIMERS DE PRESENCIA (Píldoras "for 60 min")
+        function startStatusTimer(minutes, stateName) {
+            audioEngine.playClick();
+            cancelStatusTimer();
+            
+            appState.activeTimerVal = minutes * 60;
+            const display = document.getElementById('active-timer-display');
+            const displayText = document.getElementById('timer-display-text');
+            
+            display.classList.remove('hidden');
+            displayText.textContent = `${stateName}: ${minutes}:00`;
+            
+            appState.activeTimer = setInterval(() => {
+                appState.activeTimerVal--;
+                if (appState.activeTimerVal <= 0) {
+                    cancelStatusTimer();
+                    showToast(`El tiempo para: ${stateName} ha finalizado.`, "info");
+                } else {
+                    const m = Math.floor(appState.activeTimerVal / 60).toString().padStart(2, '0');
+                    const s = (appState.activeTimerVal % 60).toString().padStart(2, '0');
+                    displayText.textContent = `${stateName}: ${m}:${s}`;
+                }
+            }, 1000);
+
+            showToast(`Ausencia programada por ${minutes} minutos para "${stateName}".`, "success");
+        }
+
+        function startSilenceTimer(minutes) {
+            audioEngine.playClick();
+            showToast(`Notificaciones silenciadas durante ${minutes} minutos.`, "danger");
+        }
+
+        function cancelStatusTimer() {
+            if (appState.activeTimer) {
+                clearInterval(appState.activeTimer);
+                appState.activeTimer = null;
+            }
+            document.getElementById('active-timer-display').classList.add('hidden');
+        }
+
+        // RENDER DE MIEMBROS DE DEPARTAMENTO (Dashboard)
+        function renderDashboardMembers() {
+            const colAtWork = document.getElementById('col-at-work');
+            const colAway = document.getElementById('col-away');
+            const countAtWork = document.getElementById('count-at-work');
+            const countAway = document.getElementById('count-away');
+            const countAwayOut = document.getElementById('count-away-out');
+
+            colAtWork.innerHTML = '';
+            colAway.innerHTML = '';
+
+            const userCardHtml = `
+                <div class="flex items-center gap-3 p-3 bg-blue-50/70 border border-blue-200/50 rounded-xl shadow-sm">
+                    <div class="relative w-10 h-10">
+                        <img src="https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=80&q=80" alt="Usted" class="w-full h-full rounded-full object-cover">
+                        <span class="absolute bottom-0 right-0 w-2.5 h-2.5 rounded-full border border-white ${appState.isCheckedIn ? 'bg-green-500' : 'bg-amber-500'}" id="user-card-status"></span>
+                    </div>
+                    <div class="flex-1 min-w-0">
+                        <p class="text-xs font-bold text-slate-800">Usted <span class="text-[9px] bg-sky-100 text-sky-800 px-1.5 py-0.2 rounded ml-1 font-semibold">Tú</span></p>
+                        <p class="text-[11px] text-slate-400 truncate">zenterprisepatam@gmail.com</p>
+                    </div>
+                </div>
+            `;
+
+            let numAtWork = 0;
+            let numAway = 0;
+
+            if (appState.isCheckedIn) {
+                colAtWork.innerHTML += userCardHtml;
+                numAtWork++;
+            } else {
+                colAway.innerHTML += userCardHtml;
+                numAway++;
+            }
+
+            appState.members.forEach(member => {
+                const memberCard = `
+                    <div class="flex items-center gap-3 p-3 hover:bg-slate-50 border border-transparent hover:border-slate-100 rounded-xl transition-all cursor-pointer" onclick="openDirectChatFromList('${member.name}')">
+                        <div class="relative w-10 h-10">
+                            <img src="${member.avatar}" alt="${member.name}" class="w-full h-full rounded-full object-cover">
+                            <span class="absolute bottom-0 right-0 w-2.5 h-2.5 rounded-full border border-white ${member.status === 'online' ? 'bg-green-500' : (member.status === 'away' ? 'bg-amber-500' : 'bg-slate-400')}"></span>
+                        </div>
+                        <div class="flex-1 min-w-0">
+                            <p class="text-xs font-bold text-slate-800">${member.name}</p>
+                            <p class="text-[11px] text-slate-400 truncate">${member.email}</p>
+                        </div>
+                    </div>
+                `;
+
+                if (member.status === 'online') {
+                    colAtWork.innerHTML += memberCard;
+                    numAtWork++;
+                } else {
+                    colAway.innerHTML += memberCard;
+                    numAway++;
+                }
+            });
+
+            // Ocultar placeholders si hay miembros
+            document.getElementById('empty-at-work-msg').style.display = numAtWork > 0 ? 'none' : 'flex';
+
+            countAtWork.textContent = numAtWork;
+            countAway.textContent = numAway;
+            countAwayOut.textContent = numAway;
+        }
+
+        // CONTROL DE ESTADO DE PRESENCIA
+        function setPresenceState(statusLabel, colorClass) {
+            audioEngine.playClick();
+            appState.presenceStatus = statusLabel.toLowerCase();
+            const dot = document.getElementById('global-status-dot');
+            dot.className = `absolute bottom-0 right-0 w-2.5 h-2.5 rounded-full border-2 border-white ${colorClass}`;
+            
+            // Sincroniza estado de "Usted"
+            if (statusLabel === 'Online') {
+                appState.isCheckedIn = true;
+                const btn = document.getElementById('btn-check-in');
+                btn.textContent = "Registrar hora de salida";
+                btn.className = "border border-red-500 text-red-600 hover:bg-red-50 font-bold text-xs px-4 py-2 rounded-lg transition-all shadow-sm";
+            }
+            
+            renderDashboardMembers();
+            showToast(`Estado establecido a: ${statusLabel}`, "success");
+            document.getElementById('profile-dropdown-menu').classList.add('hidden');
+        }
+
+        // CHAT DIRECTO DESDE BARRA LATERAL
+        function openDirectChat(chatKey) {
+            appState.activeChat = chatKey;
+            
+            // Resetea notificaciones
+            const badge = document.getElementById(`badge-side-${chatKey}`);
+            if (badge) badge.classList.add('hidden');
+
+            switchMainTab('chats');
+            renderActiveChat();
+        }
+
+        function openDirectChatFromList(memberName) {
+            const key = memberName.toLowerCase().replace(' ', '-');
+            if (!appState.conversations[key]) {
+                appState.conversations[key] = {
+                    name: memberName,
+                    avatar: "https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=80&q=80",
+                    isChannel: false,
+                    messages: []
+                };
+            }
+            openDirectChat(key);
+        }
+
+        function renderActiveChat() {
+            const chat = appState.conversations[appState.activeChat];
+            const titleEl = document.getElementById('chat-active-title');
+            const badgeEl = document.getElementById('chat-member-badge');
+            const container = document.getElementById('chat-messages-box');
+
+            titleEl.textContent = chat.name;
+            badgeEl.textContent = chat.isChannel ? "Sala de Canales" : "Mensaje Directo";
+            container.innerHTML = '';
+
+            if (chat.messages.length === 0) {
+                container.innerHTML = `<div class="text-center py-20 text-xs text-slate-400">Comienza a escribir un mensaje con ${chat.name}</div>`;
+                return;
+            }
+
+            chat.messages.forEach(msg => {
+                const isSelf = msg.self;
+                const boxClass = isSelf ? 'bg-blue-500 text-white self-end rounded-2xl rounded-tr-none' : 'bg-slate-200 text-slate-800 self-start rounded-2xl rounded-tl-none';
+                
+                const msgHtml = `
+                    <div class="flex flex-col max-w-[70%] ${isSelf ? 'self-end' : 'self-start'}">
+                        <span class="text-[10px] text-slate-400 font-medium px-1 mb-0.5">${msg.sender}</span>
+                        <div class="px-4 py-2 text-xs leading-relaxed shadow-sm ${boxClass}">
+                            <p>${msg.text}</p>
+                        </div>
+                        <span class="text-[9px] text-slate-400 mt-0.5 px-1 ${isSelf ? 'text-right' : 'text-left'}">${msg.time}</span>
+                    </div>
+                `;
+                container.insertAdjacentHTML('beforeend', msgHtml);
+            });
+
+            container.scrollTop = container.scrollHeight;
+        }
+
+        // ENVIAR MENSAJE
+        function handleChatSubmit(event) {
+            if (event.key === 'Enter' && !event.shiftKey) {
+                event.preventDefault();
+                document.getElementById('active-chat-form').requestSubmit();
+            }
+        }
+
+        document.getElementById('active-chat-form').addEventListener('submit', function(e) {
+            e.preventDefault();
+            const input = document.getElementById('active-chat-input');
+            const text = input.value.trim();
+            if (!text) return;
+
+            const now = new Date();
+            const timeStr = now.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+
+            appState.conversations[appState.activeChat].messages.push({
+                sender: 'Tú',
+                text: text,
+                time: timeStr,
+                self: true
+            });
+
+            input.value = '';
+            renderActiveChat();
+            audioEngine.playBeep(600, 0.1);
+
+            // Simulación de respuesta inteligente
+            setTimeout(() => {
+                const autoReplies = {
+                    'taz': ["Entendido, gracias por el aviso.", "Revisaré el dashboard para ver el progreso.", "Hablémoslo en la reunión."],
+                    'projects-bot': ["Comando recibido. Actualizando estado en Zoho Projects.", "No hay tareas adicionales agendadas para hoy."],
+                    'announcements': ["Solo los administradores pueden enviar comunicados."]
+                };
+
+                const replyArray = autoReplies[appState.activeChat] || ["Mensaje procesado correctamente."];
+                const randReply = replyArray[Math.floor(Math.random() * replyArray.length)];
+
+                appState.conversations[appState.activeChat].messages.push({
+                    sender: appState.conversations[appState.activeChat].name,
+                    text: randReply,
+                    time: now.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
+                    self: false
+                });
+
+                renderActiveChat();
+                audioEngine.playNotification();
+            }, 1500);
+        });
+
+        // MODALES DE VIDEO Y CONFERENCIA EN VIVO
+        function launchMeeting() {
+            audioEngine.playClick();
+            document.getElementById('meeting-modal').classList.remove('hidden');
+            startMeetingTimer();
+        }
+
+        function closeMeeting() {
+            document.getElementById('meeting-modal').classList.add('hidden');
+            clearInterval(appState.meetingInterval);
+            appState.meetingSeconds = 0;
+            
+            // Añadir al historial
+            appState.history.unshift({
+                id: Date.now(),
+                type: "Videollamada",
+                target: "zenterprise (Sala Común)",
+                date: "Hoy, justo ahora",
+                duration: "01:15 min"
+            });
+            renderHistoryRows();
+            showToast("Videoconferencia finalizada e inscrita al historial.", "info");
+        }
+
+        function startMeetingTimer() {
+            const timerLabel = document.getElementById('meeting-duration-timer');
+            appState.meetingInterval = setInterval(() => {
+                appState.meetingSeconds++;
+                const mins = Math.floor(appState.meetingSeconds / 60).toString().padStart(2, '0');
+                const secs = (appState.meetingSeconds % 60).toString().padStart(2, '0');
+                timerLabel.textContent = `${mins}:${secs}`;
+            }, 1000);
+        }
+
+        // SIMULADOR DE WEBCAM POR CANVAS NOISE
+        function initCanvasNoise() {
+            const canvas = document.getElementById('camera-noise-canvas');
+            if (!canvas) return;
+            const ctx = canvas.getContext('2d');
+            
+            function renderNoise() {
+                if (document.getElementById('meeting-modal').classList.contains('hidden')) {
+                    requestAnimationFrame(renderNoise);
+                    return;
+                }
+                canvas.width = canvas.parentElement.clientWidth;
+                canvas.height = canvas.parentElement.clientHeight;
+                
+                // Genera píxeles oscuros dinámicos
+                const imgData = ctx.createImageData(canvas.width, canvas.height);
+                const data = imgData.data;
+                for (let i = 0; i < data.length; i += 4) {
+                    const noise = Math.random() * 35;
+                    data[i] = 13 + noise;     // R
+                    data[i+1] = 43 + noise;   // G
+                    data[i+2] = 57 + noise;   // B
+                    data[i+3] = 255;          // A
+                }
+                ctx.putImageData(imgData, 0, 0);
+
+                // Dibujar un círculo central simulando cara de usuario interactivo
+                ctx.strokeStyle = "rgba(49, 130, 206, 0.3)";
+                ctx.lineWidth = 4;
+                ctx.beginPath();
+                ctx.arc(canvas.width / 2, canvas.height / 2 - 20, 50, 0, Math.PI * 2);
+                ctx.stroke();
+
+                requestAnimationFrame(renderNoise);
+            }
+            renderNoise();
+        }
+
+        // CONTROLES INTERNOS DE VIDEOLLAMADA
+        function toggleMic() {
+            appState.isMicMuted = !appState.isMicMuted;
+            const btn = document.getElementById('btn-mic');
+            btn.innerHTML = appState.isMicMuted ? '<i class="fa-solid fa-microphone-slash"></i>' : '<i class="fa-solid fa-microphone"></i>';
+            btn.classList.toggle('bg-red-600', appState.isMicMuted);
+            showToast(appState.isMicMuted ? "Micrófono Silenciado" : "Micrófono Activado", "info");
+        }
+
+        function toggleVideoFeed() {
+            appState.isVideoOff = !appState.isVideoOff;
+            const btn = document.getElementById('btn-video');
+            btn.innerHTML = appState.isVideoOff ? '<i class="fa-solid fa-video-slash"></i>' : '<i class="fa-solid fa-video"></i>';
+            btn.classList.toggle('bg-red-600', appState.isVideoOff);
+            document.getElementById('camera-noise-canvas').style.display = appState.isVideoOff ? 'none' : 'block';
+            showToast(appState.isVideoOff ? "Cámara apagada" : "Cámara encendida", "info");
+        }
+
+        function toggleScreenShare() {
+            appState.isScreenSharing = !appState.isScreenSharing;
+            const btn = document.getElementById('btn-screen');
+            btn.classList.toggle('bg-emerald-600', appState.isScreenSharing);
+            showToast(appState.isScreenSharing ? "Compartiendo pantalla" : "Pantalla compartida apagada", "success");
+        }
+
+        // AGENDADOR DE REUNIONES
+        function scheduleMeetingModal() {
+            document.getElementById('schedule-modal').classList.remove('hidden');
+        }
+
+        function closeSchedule() {
+            document.getElementById('schedule-modal').classList.add('hidden');
+        }
+
+        function saveScheduledMeeting(e) {
+            e.preventDefault();
+            const title = document.getElementById('sch-title').value;
+            const time = document.getElementById('sch-time').value;
+            const duration = document.getElementById('sch-duration').value;
+
+            appState.scheduledMeetings.push({
+                id: Date.now(),
+                title: title,
+                time: time,
+                duration: parseInt(duration)
+            });
+
+            // Actualizar vista meetings en Dashboard
+            document.getElementById('meetings-placeholder').classList.add('hidden');
+            const list = document.getElementById('meetings-list-container');
+            list.classList.remove('hidden');
+            list.innerHTML = '';
+
+            appState.scheduledMeetings.forEach(meet => {
+                list.innerHTML += `
+                    <div class="p-3 bg-blue-50/80 border-l-4 border-blue-500 rounded-lg flex justify-between items-center text-xs">
+                        <div>
+                            <p class="font-bold text-blue-950">${meet.title}</p>
+                            <p class="text-[10px] text-blue-600 mt-1">Hoy, ${meet.time} (${meet.duration} mins)</p>
+                        </div>
+                        <button onclick="launchMeeting()" class="bg-blue-500 text-white px-2.5 py-1 rounded hover:bg-blue-600 transition-all font-semibold">Unirse</button>
+                    </div>
+                `;
+            });
+
+            // Agendar al calendario
+            const calEvents = document.getElementById('calendar-events-container');
+            calEvents.innerHTML += `
+                <div class="p-3 bg-teal-50 border-l-4 border-teal-500 rounded-lg">
+                    <p class="text-xs font-bold text-teal-900 leading-tight">${title}</p>
+                    <p class="text-[10px] text-teal-600 mt-1">${time}</p>
+                </div>
+            `;
+
+            closeSchedule();
+            showToast("Reunión agendada con éxito.", "success");
+        }
+
+        // INVITACIÓN DE COLABORADORES
+        function openInviteModal() {
+            document.getElementById('invite-modal').classList.remove('hidden');
+        }
+
+        function closeInviteModal() {
+            document.getElementById('invite-modal').classList.add('hidden');
+        }
+
+        function saveUserInvitation(e) {
+            e.preventDefault();
+            const email = document.getElementById('inv-email').value;
+            const name = document.getElementById('inv-name').value;
+            const role = document.getElementById('inv-role').value;
+
+            appState.members.push({
+                id: Date.now(),
+                name: name,
+                email: email,
+                role: role,
+                status: "offline",
+                avatar: "https://images.unsplash.com/photo-1500648767791-00dcc994a43e?auto=format&fit=crop&w=100&q=80"
+            });
+
+            renderDashboardMembers();
+            renderOrgMembers();
+            closeInviteModal();
+            showToast(`Invitación enviada exitosamente a ${name}`, "success");
+        }
+
+        // DIRECTORIO DE CANALES
+        function renderChannelsDirectory() {
+            const grid = document.getElementById('channels-directory-grid');
+            grid.innerHTML = '';
+            appState.channels.forEach(ch => {
+                grid.innerHTML += `
+                    <div class="bg-white p-4 rounded-xl border border-slate-200 shadow-sm flex items-center justify-between">
+                        <div>
+                            <h3 class="font-bold text-sm text-slate-800"># ${ch.name}</h3>
+                            <p class="text-xs text-slate-400">${ch.desc}</p>
+                            <span class="text-[10px] bg-slate-100 text-slate-500 px-2 py-0.5 rounded-full font-medium mt-1 inline-block">${ch.members} miembros</span>
+                        </div>
+                        <button onclick="joinChannel('${ch.name}')" class="bg-slate-100 text-slate-700 hover:bg-slate-200 font-semibold text-xs px-3 py-1.5 rounded-lg transition-all">Unirse</button>
+                    </div>
+                `;
+            });
+        }
+
+        function joinChannel(name) {
+            showToast(`Te has unido al canal #${name}`, "success");
+        }
+
+        function createNewChannel() {
+            const name = prompt("Nombre del canal nuevo (#):");
+            if (name) {
+                const cleanName = name.replace('#', '').trim();
+                appState.channels.unshift({
+                    id: Date.now(),
+                    name: cleanName,
+                    desc: "Canal creado por el usuario en tiempo real.",
+                    members: 1
+                });
+                renderChannelsDirectory();
+                showToast(`Canal #${cleanName} creado.`, "success");
+            }
+        }
+
+        // HISTORIAL DE LLAMADAS
+        function renderHistoryRows() {
+            const container = document.getElementById('history-rows-container');
+            container.innerHTML = '';
+            appState.history.forEach(hist => {
+                container.innerHTML += `
+                    <tr class="border-b border-slate-100 hover:bg-slate-50 transition-all text-slate-700">
+                        <td class="p-3 font-semibold flex items-center gap-2">
+                            <i class="fa-solid fa-phone-arrow-up-right text-emerald-500"></i> ${hist.type}
+                        </td>
+                        <td class="p-3">${hist.target}</td>
+                        <td class="p-3">${hist.date}</td>
+                        <td class="p-3">${hist.duration}</td>
+                        <td class="p-3"><button onclick="launchMeeting()" class="text-blue-500 hover:underline">Iniciar</button></td>
+                    </tr>
+                `;
+            });
+        }
+
+        // SECCIÓN DE ARCHIVOS
+        function renderFilesList() {
+            const container = document.getElementById('files-list-container');
+            container.innerHTML = '';
+            appState.files.forEach(f => {
+                container.innerHTML += `
+                    <div class="flex items-center justify-between text-xs py-1 text-slate-700">
+                        <div class="flex items-center gap-2">
+                            <i class="fa-solid fa-file-invoice text-blue-500"></i>
+                            <span class="font-semibold">${f.name}</span>
+                        </div>
+                        <span class="text-slate-400">${f.date}</span>
+                    </div>
+                `;
+            });
+        }
+
+        function triggerFileUpload() {
+            const input = document.createElement('input');
+            input.type = 'file';
+            input.onchange = e => {
+                const file = e.target.files[0];
+                if (file) {
+                    appState.files.unshift({
+                        id: Date.now(),
+                        name: file.name,
+                        date: "Hoy, hace un momento"
+                    });
+                    renderFilesList();
+                    showToast(`Archivo ${file.name} subido con éxito`, "success");
+                }
+            };
+            input.click();
+        }
+
+        // GENERAR CALENDARIO MENSUAL
+        function renderCalendar() {
+            const grid = document.getElementById('calendar-days-grid');
+            grid.innerHTML = '';
+            const emptyDays = 5; // Mayo empieza viernes
+            const daysInMonth = 31;
+
+            for (let i = 0; i < emptyDays; i++) {
+                grid.innerHTML += `<div class="p-2 text-slate-300"></div>`;
+            }
+
+            for (let day = 1; day <= daysInMonth; day++) {
+                const isSpecial = day === 30; // Día actual simulado
+                const specialClass = isSpecial ? 'bg-blue-500 text-white font-bold rounded-lg shadow-sm' : 'hover:bg-slate-100 rounded-lg';
+                grid.innerHTML += `<div class="p-2 cursor-pointer ${specialClass}" onclick="showToast('Eventos para el día ${day} de mayo disponibles.', 'info')">${day}</div>`;
+            }
+
+            // Inyectar evento inicial
+            const calEvents = document.getElementById('calendar-events-container');
+            calEvents.innerHTML = `
+                <div class="p-3 bg-blue-50 border-l-4 border-blue-500 rounded-lg">
+                    <p class="text-xs font-bold text-blue-900 leading-tight">Sync Semanal de Diseño UX/UI</p>
+                    <p class="text-[10px] text-blue-600 mt-1">16:00 PM - 16:30 PM</p>
+                </div>
+            `;
+        }
+
+        // NOTAS RÁPIDAS
+        function renderNotes() {
+            const container = document.getElementById('notes-grid-container');
+            container.innerHTML = '';
+            appState.notes.forEach(note => {
+                container.innerHTML += `
+                    <div class="p-4 rounded-xl shadow-sm border border-amber-200 bg-amber-50 flex flex-col justify-between h-[150px]">
+                        <p class="text-xs text-amber-900 font-medium leading-relaxed">${note.text}</p>
+                        <div class="flex justify-between items-center mt-2">
+                            <span class="text-[10px] text-amber-600 font-semibold">${note.time}</span>
+                            <button onclick="deleteNote(${note.id})" class="text-amber-800 hover:text-red-600"><i class="fa-solid fa-trash-can"></i></button>
+                        </div>
+                    </div>
+                `;
+            });
+        }
+
+        function createNewNote() {
+            const text = prompt("Escribe el contenido de tu nota:");
+            if (text && text.trim() !== '') {
+                appState.notes.unshift({
+                    id: Date.now(),
+                    text: text,
+                    time: "Hace un momento"
+                });
+                renderNotes();
+                showToast("Nota agregada correctamente.", "success");
+            }
+        }
+
+        function deleteNote(id) {
+            appState.notes = appState.notes.filter(n => n.id !== id);
+            renderNotes();
+            showToast("Nota eliminada.", "info");
+        }
+
+        // DIRECTORIO EMPRESARIAL (ORG)
+        function renderOrgMembers() {
+            const container = document.getElementById('org-members-grid');
+            container.innerHTML = '';
+            appState.members.forEach(m => {
+                container.innerHTML += `
+                    <div class="bg-white p-4 rounded-xl border border-slate-200 shadow-sm flex items-center gap-3">
+                        <img src="${m.avatar}" alt="${m.name}" class="w-12 h-12 rounded-full object-cover">
+                        <div>
+                            <h4 class="font-bold text-sm text-slate-800">${m.name}</h4>
+                            <p class="text-xs text-slate-500">${m.role}</p>
+                            <p class="text-[10px] text-blue-500 font-medium mt-1">${m.email}</p>
+                        </div>
+                    </div>
+                `;
+            });
+        }
+
+        // CONTROLADORES DE SONIDOS DE INTERFAZ
+        function toggleAudioMute() {
+            audioEngine.muted = !audioEngine.muted;
+            const btn = document.getElementById('audio-toggle-btn');
+            const checkbox = document.getElementById('sounds-settings-checkbox');
+            
+            btn.innerHTML = audioEngine.muted ? '<i class="fa-solid fa-volume-xmark"></i>' : '<i class="fa-solid fa-volume-high"></i>';
+            if (checkbox) checkbox.checked = !audioEngine.muted;
+
+            showToast(audioEngine.muted ? "Efectos de sonido silenciados." : "Efectos de sonido activados.", "info");
+        }
+
+        function toggleAudioMuteFromCheckbox(checked) {
+            audioEngine.muted = !checked;
+            const btn = document.getElementById('audio-toggle-btn');
+            btn.innerHTML = audioEngine.muted ? '<i class="fa-solid fa-volume-xmark"></i>' : '<i class="fa-solid fa-volume-high"></i>';
+        }
+
+        // EVENTOS COMPLEMENTARIOS DE BOTONES MENOS COMUNES
+        function toggleRemoteWork(checked) {
+            if (checked) {
+                showToast("Sincronización del módulo Trabajo Remoto habilitada.", "success");
+            } else {
+                showToast("Trabajo Remoto temporalmente inactivo.", "warning");
+            }
+        }
+
+        function triggerAnchorsMenu(e) {
+            e.stopPropagation();
+            showToast("Menú de anclas abierto. Marca favoritos con estrellas en tus chats.", "info");
+        }
+
+        function triggerConversationsMenu(e) {
+            e.stopPropagation();
+            showToast("Abriendo opciones de administración de hilos de chat.", "info");
+        }
+
+        function openNewChatModal() {
+            const name = prompt("¿Con quién deseas iniciar un chat? (Ingresa nombre):");
+            if (name) {
+                openDirectChatFromList(name);
+            }
+        }
+
+        function toggleStarredMenu() {
+            showToast("No tienes elementos destacados en tu lista de estrellas.", "info");
+        }
+
+        function openMarketplaceModal() {
+            document.getElementById('marketplace-modal').classList.remove('hidden');
+        }
+
+        function closeMarketplaceModal() {
+            document.getElementById('marketplace-modal').classList.add('hidden');
+        }
+
+        function focusChatSearch() {
+            showToast("Buscando en la conversación activa...", "info");
+        }
+
+        // CONTROL DE TOASTS
+        function showToast(message, type) {
+            const container = document.getElementById('toast-container');
+            const id = 'toast-' + Math.random().toString(36).substr(2, 9);
+            
+            let color = "bg-slate-900 border-slate-800 text-white";
+            if (type === "success") color = "bg-emerald-50 border-emerald-200 text-emerald-800";
+            if (type === "warning") color = "bg-amber-50 border-amber-200 text-amber-800";
+            if (type === "danger") color = "bg-rose-50 border-rose-200 text-rose-800";
+
+            const item = `
+                <div id="${id}" class="p-3 border rounded-xl shadow-lg text-xs font-semibold flex items-center justify-between gap-3 ${color} max-w-sm transition-all duration-300 transform translate-y-2 opacity-0">
+                    <span>${message}</span>
+                    <button onclick="this.parentElement.remove()" class="text-slate-400 hover:text-slate-800"><i class="fa-solid fa-xmark"></i></button>
+                </div>
+            `;
+            
+            container.insertAdjacentHTML('beforeend', item);
+            const el = document.getElementById(id);
+            
+            setTimeout(() => {
+                el.classList.remove('translate-y-2', 'opacity-0');
+            }, 10);
+
+            setTimeout(() => {
+                el.classList.add('opacity-0', 'translate-y-2');
+                setTimeout(() => el.remove(), 300);
+            }, 4000);
+        }
+
+        function triggerLiveVideo() {
+            showToast("Iniciando transmisión de vídeo en directo...", "success");
+            launchMeeting();
+        }
+
+        // CIERRE DE POPUPS AL HACER CLIC FUERA
+        document.addEventListener('click', function(e) {
+            const profileMenu = document.getElementById('profile-dropdown-menu');
+            const searchMenu = document.getElementById('search-dropdown-menu');
+            const addPopover = document.getElementById('quick-add-popover');
+            const workspaceMenu = document.getElementById('workspace-dropdown-menu');
+
+            if (!e.target.closest('#profile-trigger') && profileMenu) {
+                profileMenu.classList.add('hidden');
+            }
+            if (!e.target.closest('#search-filter-btn') && searchMenu) {
+                searchMenu.classList.add('hidden');
+            }
+            if (!e.target.closest('#quick-add-popover') && !e.target.closest('[title="Crear algo nuevo"]') && addPopover) {
+                addPopover.classList.add('hidden');
+            }
+            if (!e.target.closest('#workspace-dropdown-menu') && !e.target.closest('[onclick="toggleWorkspaceDropdown(event)"]') && workspaceMenu) {
+                workspaceMenu.classList.add('hidden');
+            }
+        });
+    </script>
+</body>
+</html>

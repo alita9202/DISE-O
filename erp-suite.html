@@ -1,0 +1,1245 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>ERP Suite — Sistema Empresarial Universitario</title>
+  <style>
+    /* =============================
+       RESET & DESIGN TOKENS
+    ============================= */
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --brand     : #1264A3;
+      --brand-dk  : #0D4F87;
+      --brand-lt  : #E8F2FB;
+      --brand-mid : #1A72B8;
+      --text-h    : #111111;
+      --text-b    : #333333;
+      --text-s    : #555555;
+      --text-m    : #888888;
+      --border    : #E3E3E3;
+      --bg        : #FFFFFF;
+      --gray-bg   : #F6F6F6;
+      --r         : 8px;
+      --r-lg      : 12px;
+      --r-xl      : 16px;
+      --shadow-card : 0 2px 24px rgba(0,0,0,.09), 0 0 0 1px rgba(0,0,0,.04);
+    }
+
+    html { scroll-behavior: smooth; }
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto,
+                   'Helvetica Neue', Arial, sans-serif;
+      color: var(--text-h);
+      background: var(--bg);
+      -webkit-font-smoothing: antialiased;
+    }
+    a    { text-decoration: none; color: inherit; }
+    button { cursor: pointer; border: none; background: none; font-family: inherit; }
+    input  { font-family: inherit; }
+
+    /* =============================
+       NAVBAR
+    ============================= */
+    .navbar {
+      position: fixed; top: 0; left: 0; right: 0; z-index: 2000;
+      height: 58px;
+      background: var(--bg);
+      border-bottom: 1px solid var(--border);
+    }
+
+    .nav-inner {
+      max-width: 1200px; margin: 0 auto; height: 100%;
+      display: flex; align-items: center; padding: 0 24px; gap: 4px;
+    }
+
+    /* Logo */
+    .nav-logo {
+      display: flex; align-items: center; gap: 9px;
+      margin-right: 16px; cursor: pointer; flex-shrink: 0;
+    }
+    .nav-logo-mark {
+      width: 30px; height: 30px; border-radius: 7px;
+      background: linear-gradient(135deg, var(--brand), var(--brand-dk));
+      display: flex; align-items: center; justify-content: center;
+    }
+    .nav-logo-mark svg { width: 17px; height: 17px; color: #fff; }
+    .nav-logo-text { font-size: 15.5px; font-weight: 800; color: var(--text-h); letter-spacing: -.3px; }
+    .nav-logo-text span { color: var(--brand); }
+
+    /* Nav links */
+    .nav-links { display: flex; align-items: center; gap: 0; }
+
+    .nav-item { position: relative; }
+
+    .nav-btn {
+      display: flex; align-items: center; gap: 4px;
+      padding: 7px 13px;
+      font-size: 13.5px; font-weight: 500; color: var(--text-s);
+      border-radius: 6px; cursor: pointer; transition: all .15s; white-space: nowrap;
+      background: none;
+    }
+    .nav-btn:hover { color: var(--brand); background: var(--brand-lt); }
+    .nav-btn.productos-active { color: var(--brand); background: var(--brand-lt); }
+
+    .nav-btn svg.chevron {
+      width: 13px; height: 13px; color: var(--text-m);
+      transition: transform .2s;
+    }
+    .nav-btn.productos-active svg.chevron { transform: rotate(180deg); }
+
+    /* Right side */
+    .nav-right { display: flex; align-items: center; gap: 3px; margin-left: auto; }
+
+    .nav-icon {
+      width: 32px; height: 32px;
+      display: flex; align-items: center; justify-content: center;
+      border-radius: 6px; color: var(--text-m); cursor: pointer; transition: all .15s;
+    }
+    .nav-icon:hover { background: var(--gray-bg); color: var(--text-h); }
+    .nav-icon svg { width: 16px; height: 16px; }
+
+    .nav-lang {
+      display: flex; align-items: center; gap: 5px;
+      padding: 6px 10px; border-radius: 6px;
+      font-size: 12.5px; color: var(--text-s); cursor: pointer; transition: background .15s;
+    }
+    .nav-lang:hover { background: var(--gray-bg); }
+    .nav-lang svg { width: 14px; height: 14px; }
+
+    .nav-cta {
+      padding: 7px 16px;
+      background: var(--brand); color: #fff;
+      font-size: 13px; font-weight: 600; border-radius: 5px;
+      cursor: pointer; transition: background .2s; margin-left: 4px;
+    }
+    .nav-cta:hover { background: var(--brand-dk); }
+
+    .nav-avatar {
+      width: 30px; height: 30px; border-radius: 50%;
+      background: linear-gradient(135deg, #5a67d8, #7c3aed);
+      display: flex; align-items: center; justify-content: center;
+      color: #fff; font-size: 11px; font-weight: 800;
+      border: 2px solid var(--border); cursor: pointer; transition: border-color .2s;
+      margin-left: 4px;
+    }
+    .nav-avatar:hover { border-color: var(--brand); }
+
+    /* =============================
+       MEGA MENU
+    ============================= */
+    .mega-backdrop {
+      display: none;
+      position: fixed; inset: 0; z-index: 1500;
+      background: rgba(0,0,0,.18);
+    }
+    .mega-backdrop.open { display: block; }
+
+    .mega-panel {
+      display: none;
+      position: fixed; top: 58px; left: 0; right: 0; z-index: 1600;
+      background: var(--bg);
+      border-bottom: 1px solid var(--border);
+      box-shadow: 0 12px 40px rgba(0,0,0,.13);
+      max-height: 480px;
+      overflow: hidden;
+      animation: megaFadeIn .18s ease;
+    }
+    .mega-panel.open { display: flex; }
+
+    @keyframes megaFadeIn {
+      from { opacity: 0; transform: translateY(-6px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+
+    .mega-inner {
+      max-width: 1200px; margin: 0 auto; width: 100%;
+      display: flex;
+    }
+
+    /* Sidebar */
+    .mega-sidebar {
+      width: 210px; flex-shrink: 0;
+      border-right: 1px solid var(--border);
+      padding: 20px 0; background: var(--gray-bg);
+    }
+    .mega-sb-label {
+      font-size: 10px; font-weight: 800; text-transform: uppercase;
+      letter-spacing: 1.2px; color: var(--text-m);
+      padding: 0 18px 10px; display: block;
+    }
+    .mega-cat {
+      display: flex; align-items: center; gap: 9px;
+      padding: 9px 18px; font-size: 13px; font-weight: 500;
+      color: var(--text-s); cursor: pointer; transition: all .12s;
+      border-left: 3px solid transparent;
+    }
+    .mega-cat:hover  { color: var(--brand); background: var(--brand-lt); }
+    .mega-cat.active { color: var(--brand); background: var(--brand-lt); font-weight: 700; border-left-color: var(--brand); }
+    .mega-cat-dot { width: 7px; height: 7px; border-radius: 50%; flex-shrink: 0; }
+
+    /* Content */
+    .mega-content { flex: 1; padding: 20px 28px; overflow-y: auto; }
+    .mega-content-label {
+      font-size: 10px; font-weight: 800; text-transform: uppercase;
+      letter-spacing: 1.2px; color: var(--text-m); margin-bottom: 16px; display: block;
+    }
+
+    .mega-grid { display: grid; grid-template-columns: repeat(3,1fr); gap: 4px; }
+
+    .mega-mod {
+      display: flex; align-items: center; gap: 11px;
+      padding: 11px 12px; border-radius: var(--r); cursor: pointer; transition: background .12s;
+    }
+    .mega-mod:hover { background: var(--brand-lt); }
+    .mega-mod:hover .mm-name { color: var(--brand); }
+
+    .mm-icon {
+      width: 36px; height: 36px; border-radius: 8px;
+      display: flex; align-items: center; justify-content: center; flex-shrink: 0;
+    }
+    .mm-icon svg { width: 18px; height: 18px; }
+    .mm-name { font-size: 13px; font-weight: 700; color: var(--text-h); margin-bottom: 2px; transition: color .12s; }
+    .mm-sub  { font-size: 11px; color: var(--text-m); line-height: 1.35; }
+
+    .mega-foot {
+      padding: 14px 28px;
+      border-top: 1px solid var(--border);
+      display: flex; align-items: center; gap: 8px;
+      background: var(--bg);
+    }
+    .mega-foot-link {
+      display: inline-flex; align-items: center; gap: 5px;
+      font-size: 12.5px; font-weight: 800; color: var(--brand);
+      text-transform: uppercase; letter-spacing: .5px;
+      cursor: pointer; transition: gap .2s;
+    }
+    .mega-foot-link:hover { gap: 8px; }
+    .mega-foot-link svg { width: 13px; height: 13px; }
+    .mega-foot-note { font-size: 12px; color: var(--text-m); margin-left: 12px; }
+
+    /* =============================
+       PAGE VISIBILITY
+    ============================= */
+    #page-home     { display: block; }
+    #page-products { display: none; }
+    #page-module   { display: none; }
+
+    /* =============================
+       HERO  (estilo Zoho — fondo blanco)
+    ============================= */
+    .hero {
+      margin-top: 58px;
+      background: var(--bg);
+      padding: 60px 0 0;
+      overflow: hidden;
+      border-bottom: 1px solid var(--border);
+    }
+
+    .hero-inner {
+      max-width: 1200px; margin: 0 auto; padding: 0 24px;
+      display: grid; grid-template-columns: 1fr 390px; gap: 52px;
+      align-items: flex-start;
+    }
+
+    /* LEFT */
+    .hero-left { display: flex; flex-direction: column; padding-bottom: 48px; }
+
+    .hero-eyebrow {
+      font-size: 12px; font-weight: 700; color: var(--brand);
+      text-transform: uppercase; letter-spacing: 1px; margin-bottom: 20px;
+    }
+
+    .hero-h1 {
+      font-size: 42px; font-weight: 900; color: var(--text-h);
+      line-height: 1.1; letter-spacing: -1.2px; margin-bottom: 18px;
+    }
+
+    .hero-p {
+      font-size: 15.5px; color: var(--text-s); line-height: 1.8;
+      max-width: 480px; margin-bottom: 32px;
+    }
+
+    .hero-actions { display: flex; gap: 12px; flex-wrap: wrap; margin-bottom: 52px; }
+
+    .btn-primary {
+      display: inline-flex; align-items: center; gap: 7px;
+      padding: 11px 22px;
+      background: var(--brand); color: #fff;
+      font-size: 14px; font-weight: 700; border-radius: 4px;
+      cursor: pointer; transition: all .18s; letter-spacing: .2px;
+    }
+    .btn-primary:hover { background: var(--brand-dk); box-shadow: 0 4px 14px rgba(18,100,163,.3); }
+    .btn-primary svg { width: 15px; height: 15px; }
+
+    .btn-secondary {
+      display: inline-flex; align-items: center; gap: 7px;
+      padding: 11px 22px;
+      background: transparent; color: var(--brand);
+      font-size: 14px; font-weight: 700; border-radius: 4px;
+      border: 1.5px solid var(--brand); cursor: pointer; transition: background .18s;
+    }
+    .btn-secondary:hover { background: var(--brand-lt); }
+
+    /* ILLUSTRATION */
+    .hero-illus {
+      width: 100%; display: flex; align-items: flex-end; gap: 14px;
+    }
+
+    .illus-card {
+      background: var(--bg); border: 1px solid var(--border);
+      border-radius: 12px; padding: 16px;
+      box-shadow: 0 2px 16px rgba(0,0,0,.07);
+      flex: 1; min-width: 0;
+    }
+    .illus-card-label {
+      font-size: 10.5px; font-weight: 700; text-transform: uppercase;
+      letter-spacing: .8px; color: var(--text-m); margin-bottom: 12px;
+    }
+    .illus-bars { display: flex; align-items: flex-end; gap: 5px; height: 52px; }
+    .illus-bar {
+      flex: 1; border-radius: 3px 3px 0 0; background: var(--brand);
+    }
+    .illus-bar.dim { background: #BFDBFE; }
+
+    .illus-stats {
+      background: var(--bg); border: 1px solid var(--border);
+      border-radius: 12px; padding: 16px;
+      box-shadow: 0 2px 16px rgba(0,0,0,.07); width: 140px; flex-shrink: 0;
+    }
+    .illus-stat-val { font-size: 22px; font-weight: 900; color: var(--text-h); line-height: 1; }
+    .illus-stat-lbl { font-size: 11px; color: var(--text-m); margin-top: 4px; }
+    .illus-stat-trend { font-size: 11px; font-weight: 700; color: #059669; margin-top: 6px; }
+
+    .illus-wide {
+      background: linear-gradient(135deg, var(--brand-lt), #E0EEFF);
+      border: 1px solid #C5DDF5; border-radius: 12px; padding: 16px;
+      flex: 1.4; min-width: 0;
+    }
+    .illus-wide-title { font-size: 11px; font-weight: 700; color: var(--brand); margin-bottom: 10px; }
+    .illus-dots { display: flex; gap: 6px; flex-wrap: wrap; }
+    .illus-dot {
+      display: flex; align-items: center; gap: 5px;
+      font-size: 11px; color: var(--text-b); font-weight: 600;
+    }
+    .dot-circle { width: 7px; height: 7px; border-radius: 50%; }
+
+    /* RIGHT — FEATURED CARD */
+    .featured-card {
+      background: var(--bg); border: 1px solid var(--border);
+      border-radius: var(--r-xl);
+      box-shadow: var(--shadow-card);
+      overflow: hidden;
+      position: sticky; top: 74px;
+    }
+
+    .fc-header {
+      padding: 13px 22px;
+      font-size: 10.5px; font-weight: 800; text-transform: uppercase;
+      letter-spacing: 1.2px; color: var(--text-m);
+      border-bottom: 1px solid #F0F0F0;
+    }
+
+    .fc-item {
+      display: flex; align-items: center; gap: 14px;
+      padding: 14px 22px; border-bottom: 1px solid #F7F7F7;
+      cursor: pointer; transition: background .12s;
+    }
+    .fc-item:hover { background: #FAFAFA; }
+
+    .fc-icon {
+      width: 42px; height: 42px; border-radius: 10px;
+      display: flex; align-items: center; justify-content: center; flex-shrink: 0;
+    }
+    .fc-icon svg { width: 22px; height: 22px; }
+
+    .fc-text { flex: 1; min-width: 0; }
+    .fc-name { font-size: 19px; font-weight: 800; color: var(--text-h); line-height: 1.2; }
+    .fc-desc { font-size: 12px; color: var(--text-m); margin-top: 2px; line-height: 1.4; }
+
+    .fc-arrow { color: #CCCCCC; flex-shrink: 0; }
+    .fc-arrow svg { width: 17px; height: 17px; }
+
+    .fc-footer {
+      padding: 12px 22px;
+      display: flex; align-items: center; gap: 6px;
+      font-size: 11.5px; font-weight: 800; color: var(--brand);
+      text-transform: uppercase; letter-spacing: .5px;
+      cursor: pointer; transition: gap .2s; border-top: 1px solid #F0F0F0;
+    }
+    .fc-footer:hover { gap: 9px; }
+    .fc-footer svg { width: 13px; height: 13px; }
+
+    /* =============================
+       SUITE SECTION  (Zoho ONE equiv.)
+    ============================= */
+    .suite-section {
+      background: #F5C843;
+      padding: 68px 24px; text-align: center;
+    }
+
+    .suite-icon {
+      width: 50px; height: 50px; border-radius: 14px;
+      background: rgba(0,0,0,.12);
+      display: flex; align-items: center; justify-content: center;
+      margin: 0 auto 16px;
+    }
+    .suite-icon svg { width: 27px; height: 27px; color: rgba(0,0,0,.5); }
+
+    .suite-eyebrow {
+      font-size: 13px; font-weight: 700; text-transform: uppercase;
+      letter-spacing: 1px; color: rgba(0,0,0,.45); margin-bottom: 8px;
+    }
+    .suite-title { font-size: 38px; font-weight: 900; color: #111; letter-spacing: -.6px; margin-bottom: 18px; }
+    .suite-desc  { font-size: 16px; color: rgba(0,0,0,.6); max-width: 540px; margin: 0 auto 28px; line-height: 1.75; }
+
+    .suite-cta {
+      display: inline-flex; align-items: center; gap: 8px;
+      padding: 12px 26px;
+      background: #111; color: #fff;
+      font-size: 14px; font-weight: 700; border-radius: 4px;
+      cursor: pointer; transition: opacity .2s;
+    }
+    .suite-cta:hover { opacity: .82; }
+    .suite-cta svg { width: 15px; height: 15px; }
+
+    /* =============================
+       ENTERPRISE SECTION
+    ============================= */
+    .enterprise-section {
+      padding: 72px 24px; text-align: center;
+      border-top: 1px solid var(--border);
+    }
+    .ent-inner { max-width: 680px; margin: 0 auto; }
+    .ent-h2  { font-size: 28px; font-weight: 800; color: var(--text-h); margin-bottom: 16px; letter-spacing: -.3px; }
+    .ent-p   { font-size: 15.5px; color: var(--text-s); line-height: 1.75; margin-bottom: 28px; }
+    .ent-btn {
+      display: inline-flex; align-items: center; gap: 7px;
+      padding: 10px 22px;
+      border: 1.5px solid var(--text-h); color: var(--text-h);
+      font-size: 13.5px; font-weight: 700; border-radius: 4px;
+      cursor: pointer; transition: all .18s;
+    }
+    .ent-btn:hover { background: var(--text-h); color: #fff; }
+    .ent-btn svg { width: 14px; height: 14px; }
+
+    /* =============================
+       FOOTER
+    ============================= */
+    .footer {
+      background: #1A1A1A; color: #777;
+      padding: 28px 24px; text-align: center;
+    }
+    .footer p { font-size: 12.5px; }
+    .footer strong { color: #ccc; }
+
+    /* =============================
+       ALL PRODUCTS PAGE
+    ============================= */
+    .prod-topbar {
+      margin-top: 58px;
+      padding: 18px 24px;
+      border-bottom: 1px solid var(--border);
+      background: var(--bg);
+    }
+    .prod-topbar-inner {
+      max-width: 1200px; margin: 0 auto;
+      display: flex; align-items: flex-end; justify-content: space-between;
+    }
+    .prod-topbar h1 { font-size: 18px; font-weight: 800; color: var(--text-h); margin-bottom: 4px; }
+    .prod-topbar p  { font-size: 13px; color: var(--text-m); }
+    .prod-topbar-close {
+      width: 30px; height: 30px; border-radius: 50%;
+      display: flex; align-items: center; justify-content: center;
+      background: var(--gray-bg); cursor: pointer; transition: background .15s;
+    }
+    .prod-topbar-close:hover { background: var(--border); }
+    .prod-topbar-close svg { width: 16px; height: 16px; color: var(--text-s); }
+
+    .prod-layout {
+      max-width: 1200px; margin: 0 auto; padding: 0 24px 48px;
+      display: flex; gap: 0;
+    }
+
+    /* Sidebar */
+    .prod-sidebar {
+      width: 200px; flex-shrink: 0; padding: 24px 0;
+      border-right: 1px solid var(--border);
+    }
+    .psb-section { margin-bottom: 24px; }
+    .psb-title {
+      font-size: 10px; font-weight: 800; text-transform: uppercase;
+      letter-spacing: 1.2px; color: var(--text-m); padding: 0 16px 8px; display: block;
+    }
+    .psb-item {
+      display: flex; align-items: center; gap: 8px;
+      padding: 7px 16px; font-size: 13px; font-weight: 500; color: var(--text-s);
+      cursor: pointer; transition: all .12s; border-left: 2px solid transparent;
+    }
+    .psb-item:hover  { color: var(--brand); background: var(--brand-lt); }
+    .psb-item.active { color: var(--brand); background: var(--brand-lt); font-weight: 700; border-left-color: var(--brand); }
+    .psb-dot { width: 7px; height: 7px; border-radius: 50%; flex-shrink: 0; }
+
+    /* Main */
+    .prod-main { flex: 1; padding: 24px 28px; min-width: 0; }
+
+    .prod-toolbar {
+      display: flex; align-items: center; justify-content: space-between;
+      margin-bottom: 24px; padding-bottom: 14px; border-bottom: 1px solid var(--border);
+    }
+    .prod-toolbar-left { display: flex; flex-direction: column; gap: 2px; }
+    .prod-section-name { font-size: 16px; font-weight: 800; color: var(--text-h); }
+    .prod-section-count { font-size: 12px; color: var(--text-m); }
+
+    .prod-searchbox {
+      display: flex; align-items: center; gap: 7px;
+      background: var(--bg); border: 1.5px solid var(--border);
+      border-radius: var(--r); padding: 7px 12px; width: 230px;
+      transition: border-color .2s;
+    }
+    .prod-searchbox:focus-within { border-color: var(--brand); }
+    .prod-searchbox svg { width: 14px; height: 14px; color: #bbb; flex-shrink: 0; }
+    .prod-searchbox input {
+      border: none; outline: none; font-size: 13px; color: var(--text-h);
+      width: 100%; background: transparent;
+    }
+    .prod-searchbox input::placeholder { color: #bbb; }
+
+    /* Cards */
+    .prod-grid { display: grid; grid-template-columns: repeat(3,1fr); gap: 16px; }
+
+    .pcard {
+      background: var(--bg); border: 1px solid var(--border); border-radius: var(--r-lg);
+      padding: 24px; cursor: pointer; transition: all .22s;
+      animation: cardUp .3s ease both;
+    }
+    @keyframes cardUp {
+      from { opacity:0; transform: translateY(10px); }
+      to   { opacity:1; transform: translateY(0); }
+    }
+    .pcard:hover {
+      border-color: #ccc;
+      box-shadow: 0 6px 22px rgba(0,0,0,.09);
+      transform: translateY(-3px);
+    }
+
+    .pcard-icon { width: 46px; height: 46px; border-radius: var(--r); display: flex; align-items: center; justify-content: center; margin-bottom: 15px; }
+    .pcard-icon svg { width: 23px; height: 23px; }
+    .pcard-name { font-size: 14.5px; font-weight: 800; color: var(--text-h); margin-bottom: 7px; }
+    .pcard-desc { font-size: 12.5px; color: var(--text-s); line-height: 1.65; margin-bottom: 16px; }
+    .pcard-link {
+      display: inline-flex; align-items: center; gap: 5px;
+      font-size: 12.5px; font-weight: 700; cursor: pointer; transition: gap .18s;
+    }
+    .pcard-link:hover { gap: 8px; }
+    .pcard-link svg { width: 12px; height: 12px; }
+
+    /* =============================
+       MODULE DETAIL
+    ============================= */
+    .mod-hero {
+      margin-top: 58px; padding: 52px 24px; color: #fff;
+    }
+    .mod-hero-inner {
+      max-width: 1200px; margin: 0 auto;
+      display: grid; grid-template-columns: 1fr 1fr; gap: 52px; align-items: center;
+    }
+    .mod-bigicon {
+      width: 60px; height: 60px; border-radius: 15px;
+      background: rgba(255,255,255,.16);
+      display: flex; align-items: center; justify-content: center; margin-bottom: 22px;
+    }
+    .mod-bigicon svg { width: 32px; height: 32px; }
+    .mod-hero h1 { font-size: 36px; font-weight: 900; letter-spacing: -.6px; margin-bottom: 14px; line-height: 1.1; }
+    .mod-hero p  { font-size: 16px; opacity: .75; line-height: 1.75; margin-bottom: 26px; }
+    .mod-back-btn {
+      display: inline-flex; align-items: center; gap: 7px;
+      padding: 9px 18px; background: rgba(255,255,255,.12); color: #fff;
+      border: 1px solid rgba(255,255,255,.22); border-radius: var(--r);
+      font-size: 13px; font-weight: 600; cursor: pointer; transition: background .18s;
+    }
+    .mod-back-btn:hover { background: rgba(255,255,255,.2); }
+    .mod-back-btn svg { width: 14px; height: 14px; }
+
+    .mod-metrics { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+    .met-box {
+      background: rgba(255,255,255,.12); border: 1px solid rgba(255,255,255,.14);
+      border-radius: var(--r-lg); padding: 18px;
+    }
+    .met-val { font-size: 24px; font-weight: 900; color: #fff; margin-bottom: 4px; }
+    .met-lbl { font-size: 12px; opacity: .6; }
+
+    .mod-feats { max-width: 1200px; margin: 0 auto; padding: 48px 24px; }
+    .mod-feats h2 { font-size: 20px; font-weight: 800; color: var(--text-h); margin-bottom: 22px; }
+    .feats-grid { display: grid; grid-template-columns: repeat(3,1fr); gap: 14px; }
+
+    .feat-card {
+      background: var(--bg); border: 1px solid var(--border); border-radius: var(--r-lg); padding: 20px;
+      animation: cardUp .35s ease both;
+    }
+    .feat-card-icon { width: 36px; height: 36px; border-radius: 8px; display: flex; align-items: center; justify-content: center; margin-bottom: 12px; }
+    .feat-card-icon svg { width: 18px; height: 18px; }
+    .feat-card h4 { font-size: 13.5px; font-weight: 700; color: var(--text-h); margin-bottom: 5px; }
+    .feat-card p  { font-size: 12px; color: var(--text-s); line-height: 1.6; }
+
+    /* =============================
+       RESPONSIVE
+    ============================= */
+    @media (max-width: 980px) {
+      .hero-inner      { grid-template-columns: 1fr; }
+      .featured-card   { position: static; }
+      .prod-grid       { grid-template-columns: repeat(2,1fr); }
+      .mod-hero-inner  { grid-template-columns: 1fr; }
+      .mod-metrics     { display: none; }
+      .mega-grid       { grid-template-columns: repeat(2,1fr); }
+    }
+    @media (max-width: 768px) {
+      .nav-links       { display: none; }
+      .prod-sidebar    { display: none; }
+      .prod-layout     { padding: 0 16px 32px; }
+      .hero-h1         { font-size: 30px; }
+      .hero-inner      { padding: 0 16px; }
+      .feats-grid      { grid-template-columns: 1fr 1fr; }
+      .mega-grid       { grid-template-columns: 1fr; }
+    }
+    @media (max-width: 520px) {
+      .prod-grid       { grid-template-columns: 1fr; }
+      .feats-grid      { grid-template-columns: 1fr; }
+    }
+  </style>
+</head>
+<body>
+
+<!-- ===========================================
+     NAVBAR
+=========================================== -->
+<nav class="navbar">
+  <div class="nav-inner">
+
+    <div class="nav-logo" onclick="goHome()">
+      <div class="nav-logo-mark">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+          <rect x="2" y="3" width="20" height="14" rx="2"/>
+          <line x1="8" y1="21" x2="16" y2="21"/>
+          <line x1="12" y1="17" x2="12" y2="21"/>
+        </svg>
+      </div>
+      <span class="nav-logo-text">ERP<span>Suite</span></span>
+    </div>
+
+    <div class="nav-links">
+      <div class="nav-item">
+        <button class="nav-btn" id="btn-productos" onclick="toggleMega()">
+          Productos
+          <svg class="chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+            <polyline points="6 9 12 15 18 9"/>
+          </svg>
+        </button>
+      </div>
+      <div class="nav-item">
+        <button class="nav-btn">Clientes</button>
+      </div>
+      <div class="nav-item">
+        <button class="nav-btn">Recursos</button>
+      </div>
+    </div>
+
+    <div class="nav-right">
+      <div class="nav-icon" title="Buscar">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <circle cx="11" cy="11" r="8"/>
+          <line x1="21" y1="21" x2="16.65" y2="16.65"/>
+        </svg>
+      </div>
+      <div class="nav-lang">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <circle cx="12" cy="12" r="10"/>
+          <line x1="2" y1="12" x2="22" y2="12"/>
+          <path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/>
+        </svg>
+        Español
+      </div>
+      <div class="nav-cta">Acceder</div>
+      <div class="nav-avatar">AU</div>
+    </div>
+
+  </div>
+</nav>
+
+
+<!-- ===========================================
+     MEGA MENU
+=========================================== -->
+<div class="mega-backdrop" id="mega-backdrop" onclick="closeMega()"></div>
+
+<div class="mega-panel" id="mega-panel">
+  <div class="mega-inner">
+
+    <!-- Sidebar -->
+    <div class="mega-sidebar">
+      <span class="mega-sb-label">Categorías</span>
+      <div id="mega-cats"><!-- JS --></div>
+    </div>
+
+    <!-- Content -->
+    <div style="flex:1; display:flex; flex-direction:column;">
+      <div class="mega-content">
+        <span class="mega-content-label" id="mega-content-label">Todos los módulos</span>
+        <div class="mega-grid" id="mega-grid"><!-- JS --></div>
+      </div>
+      <div class="mega-foot">
+        <div class="mega-foot-link" onclick="goProducts(); closeMega();">
+          Explorar todos los módulos
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+            <line x1="5" y1="12" x2="19" y2="12"/>
+            <polyline points="12 5 19 12 12 19"/>
+          </svg>
+        </div>
+        <span class="mega-foot-note">10 módulos · Suite completa</span>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+
+<!-- ===========================================
+     HOME PAGE
+=========================================== -->
+<div id="page-home">
+
+  <!-- HERO -->
+  <section class="hero">
+    <div class="hero-inner">
+
+      <!-- LEFT -->
+      <div class="hero-left">
+        <div class="hero-eyebrow">Sistema ERP Universitario</div>
+        <h1 class="hero-h1">El trabajo de tu empresa,<br>impulsado por tecnología</h1>
+        <p class="hero-p">
+          Soluciones de software empresarial integradas que centralizan ventas,
+          inventario, finanzas, recursos humanos y automatización. Diseñado para
+          organizaciones que buscan eficiencia y control total.
+        </p>
+
+        <div class="hero-actions">
+          <div class="btn-primary" onclick="goProducts()">
+            Acceder a tus módulos
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+              <line x1="5" y1="12" x2="19" y2="12"/>
+              <polyline points="12 5 19 12 12 19"/>
+            </svg>
+          </div>
+          <div class="btn-secondary">Explorar ERP Suite</div>
+        </div>
+
+        <!-- ILLUSTRATION (dashboard preview) -->
+        <div class="hero-illus">
+          <div class="illus-card">
+            <div class="illus-card-label">Ventas este mes</div>
+            <div class="illus-bars">
+              <div class="illus-bar dim"  style="height:40%"></div>
+              <div class="illus-bar"      style="height:65%"></div>
+              <div class="illus-bar dim"  style="height:50%"></div>
+              <div class="illus-bar"      style="height:80%"></div>
+              <div class="illus-bar dim"  style="height:55%"></div>
+              <div class="illus-bar"      style="height:100%"></div>
+              <div class="illus-bar dim"  style="height:70%"></div>
+            </div>
+          </div>
+          <div class="illus-stats">
+            <div class="illus-stat-val">3,847</div>
+            <div class="illus-stat-lbl">Órdenes activas</div>
+            <div class="illus-stat-trend">↑ +24% este mes</div>
+          </div>
+          <div class="illus-wide">
+            <div class="illus-wide-title">MÓDULOS CONECTADOS</div>
+            <div class="illus-dots" id="illus-dots"><!-- JS --></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- RIGHT — FEATURED CARD -->
+      <div>
+        <div class="featured-card">
+          <div class="fc-header">Módulos Destacados</div>
+          <div id="fc-items"><!-- JS --></div>
+          <div class="fc-footer" onclick="goProducts()">
+            Explorar todos los módulos
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+              <line x1="5" y1="12" x2="19" y2="12"/>
+              <polyline points="12 5 19 12 12 19"/>
+            </svg>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </section>
+
+  <!-- SUITE SECTION (Zoho ONE equivalent) -->
+  <div class="suite-section">
+    <div class="suite-icon">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+        <path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"/>
+        <polyline points="3.27 6.96 12 12.01 20.73 6.96"/>
+        <line x1="12" y1="22.08" x2="12" y2="12"/>
+      </svg>
+    </div>
+    <div class="suite-eyebrow">Suite todo en uno</div>
+    <div class="suite-title">ERP Suite Universitario</div>
+    <p class="suite-desc">
+      Gestiona toda tu empresa con ERP Suite. Nuestra plataforma unificada en la nube
+      conecta todos tus departamentos, elimina los silos de información y aumenta la
+      productividad de tu organización con 10 módulos integrados.
+    </p>
+    <div class="suite-cta" onclick="goProducts()">
+      Acceder a tus módulos
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+        <line x1="5" y1="12" x2="19" y2="12"/>
+        <polyline points="12 5 19 12 12 19"/>
+      </svg>
+    </div>
+  </div>
+
+  <!-- ENTERPRISE SECTION -->
+  <div class="enterprise-section">
+    <div class="ent-inner">
+      <h2 class="ent-h2">ERP Suite para Grandes Organizaciones</h2>
+      <p class="ent-p">
+        Experimenta la solidez y escalabilidad de ERP Suite con soporte empresarial,
+        asistencia técnica personalizada e infraestructura de alto rendimiento para
+        organizaciones que exigen lo mejor.
+      </p>
+      <div class="ent-btn">
+        Más información
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+          <line x1="5" y1="12" x2="19" y2="12"/>
+          <polyline points="12 5 19 12 12 19"/>
+        </svg>
+      </div>
+    </div>
+  </div>
+
+  <footer class="footer">
+    <p>© 2025 <strong>ERP Suite</strong> — Sistema Empresarial Universitario &nbsp;·&nbsp; Proyecto de Exposición</p>
+  </footer>
+</div>
+
+
+<!-- ===========================================
+     ALL PRODUCTS PAGE
+=========================================== -->
+<div id="page-products">
+  <div class="prod-topbar">
+    <div class="prod-topbar-inner">
+      <div>
+        <h1>Todo el software que necesitas para gestionar tu empresa</h1>
+        <p>Elige el módulo que necesitas. Tenemos lo que buscas.</p>
+      </div>
+      <div class="prod-topbar-close" onclick="goHome()" title="Cerrar">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+          <line x1="18" y1="6" x2="6" y2="18"/>
+          <line x1="6" y1="6" x2="18" y2="18"/>
+        </svg>
+      </div>
+    </div>
+  </div>
+
+  <div class="prod-layout">
+
+    <!-- Sidebar -->
+    <aside class="prod-sidebar">
+      <div class="psb-section">
+        <span class="psb-title">Categorías</span>
+        <div id="psb-list"><!-- JS --></div>
+      </div>
+    </aside>
+
+    <!-- Main -->
+    <main class="prod-main">
+      <div class="prod-toolbar">
+        <div class="prod-toolbar-left">
+          <span class="prod-section-name" id="prod-section-name">Todos los módulos</span>
+          <span class="prod-section-count" id="prod-section-count">10 módulos</span>
+        </div>
+        <div class="prod-searchbox">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <circle cx="11" cy="11" r="8"/>
+            <line x1="21" y1="21" x2="16.65" y2="16.65"/>
+          </svg>
+          <input type="text" placeholder="Buscar módulo…" oninput="filterProducts(this.value)" />
+        </div>
+      </div>
+      <div class="prod-grid" id="prod-grid"><!-- JS --></div>
+    </main>
+
+  </div>
+
+  <footer class="footer">
+    <p>© 2025 <strong>ERP Suite</strong> — Sistema Empresarial Universitario &nbsp;·&nbsp; Proyecto de Exposición</p>
+  </footer>
+</div>
+
+
+<!-- ===========================================
+     MODULE DETAIL PAGE
+=========================================== -->
+<div id="page-module">
+  <div class="mod-hero" id="mod-hero-section">
+    <div class="mod-hero-inner">
+      <div>
+        <div class="mod-bigicon" id="mod-bigicon"></div>
+        <h1 id="mod-title"></h1>
+        <p  id="mod-desc"></p>
+        <div class="mod-back-btn" onclick="goProducts()">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+            <line x1="19" y1="12" x2="5" y2="12"/>
+            <polyline points="12 19 5 12 12 5"/>
+          </svg>
+          Volver a módulos
+        </div>
+      </div>
+      <div class="mod-metrics" id="mod-metrics"></div>
+    </div>
+  </div>
+
+  <div class="mod-feats">
+    <h2>Características principales</h2>
+    <div class="feats-grid" id="feats-grid"></div>
+  </div>
+
+  <footer class="footer">
+    <p>© 2025 <strong>ERP Suite</strong> — Sistema Empresarial Universitario &nbsp;·&nbsp; Proyecto de Exposición</p>
+  </footer>
+</div>
+
+
+<!-- ===========================================
+     JAVASCRIPT
+=========================================== -->
+<script>
+/* ===== DATA ===== */
+const MODULES = [
+  {
+    id:1, name:"CRM y Ventas",
+    short:"Gestión de clientes y pipeline de ventas",
+    desc:"Centraliza todas tus interacciones con clientes, gestiona el ciclo de ventas completo y acelera el crecimiento con herramientas de CRM inteligente y analítica de oportunidades en tiempo real.",
+    color:"#1264A3", bg:"#E8F2FB", cat:"Ventas",
+    metrics:[{v:"3,847",l:"Leads activos"},{v:"€1.2M",l:"Pipeline abierto"},{v:"68%",l:"Tasa de cierre"},{v:"24h",l:"Resp. promedio"}],
+    features:["Pipeline de ventas visual","Seguimiento de leads","Automatización de correos","Reportes de conversión","Integración con email","Gestión de contactos"],
+    icon:`<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>`
+  },
+  {
+    id:2, name:"Inventario",
+    short:"Control de stock y almacenes en tiempo real",
+    desc:"Mantén control preciso de tu inventario, gestiona múltiples almacenes y optimiza niveles de stock con alertas automáticas, código de barras y reportes detallados de movimientos.",
+    color:"#059669", bg:"#ECFDF5", cat:"Operaciones",
+    metrics:[{v:"12,440",l:"SKUs activos"},{v:"4",l:"Almacenes"},{v:"99.2%",l:"Precisión stock"},{v:"8.3d",l:"Rotación"}],
+    features:["Control de stock en tiempo real","Gestión multi-almacén","Alertas de reposición","Código de barras / QR","Trazabilidad de lotes","Inventario físico"],
+    icon:`<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"/><polyline points="3.27 6.96 12 12.01 20.73 6.96"/><line x1="12" y1="22.08" x2="12" y2="12"/></svg>`
+  },
+  {
+    id:3, name:"Compras y Proveedores",
+    short:"Gestión de compras y relación con proveedores",
+    desc:"Optimiza tu proceso de compras, gestiona relaciones con proveedores estratégicos y reduce costos con análisis comparativos de precios, condiciones y plazos de entrega automatizados.",
+    color:"#D97706", bg:"#FFFBEB", cat:"Operaciones",
+    metrics:[{v:"286",l:"Proveedores"},{v:"€540K",l:"Compras/mes"},{v:"15%",l:"Ahorro prom."},{v:"3.2d",l:"Entrega"}],
+    features:["Órdenes de compra","Gestión de proveedores","Comparación de cotizaciones","Recepción de mercancía","Evaluación de proveedores","Contratos y acuerdos"],
+    icon:`<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="9" cy="21" r="1"/><circle cx="20" cy="21" r="1"/><path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6"/></svg>`
+  },
+  {
+    id:4, name:"Contabilidad y Finanzas",
+    short:"Control financiero y contabilidad empresarial",
+    desc:"Control financiero completo con contabilidad en tiempo real, gestión de flujo de caja, reportes financieros automatizados y cumplimiento tributario integrado para tu organización.",
+    color:"#7C3AED", bg:"#F5F3FF", cat:"Finanzas",
+    metrics:[{v:"€2.8M",l:"Ingresos mes"},{v:"97.4%",l:"Conciliación"},{v:"0",l:"Errores contab."},{v:"2h",l:"Cierre mensual"}],
+    features:["Libro mayor y diario","Cuentas por cobrar / pagar","Flujo de caja","Estados financieros","Gestión tributaria","Presupuestos"],
+    icon:`<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg>`
+  },
+  {
+    id:5, name:"Recursos Humanos",
+    short:"Gestión del talento y nómina empresarial",
+    desc:"Administra el ciclo completo del empleado desde el reclutamiento hasta la jubilación, con gestión de nómina, control de asistencia y desarrollo del talento humano integrado.",
+    color:"#DB2777", bg:"#FDF2F8", cat:"RRHH",
+    metrics:[{v:"1,240",l:"Empleados"},{v:"98.1%",l:"Satisfacción"},{v:"14d",l:"Contratación"},{v:"€0",l:"Errores nómina"}],
+    features:["Gestión de nómina","Control de asistencia","Reclutamiento y selección","Evaluación de desempeño","Gestión de vacaciones","Capacitación"],
+    icon:`<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>`
+  },
+  {
+    id:6, name:"Proyectos y Operaciones",
+    short:"Planificación y seguimiento de proyectos",
+    desc:"Planifica, ejecuta y monitorea proyectos con herramientas ágiles, asignación de recursos, control de tiempos y colaboración en equipo para entregar a tiempo y en presupuesto.",
+    color:"#6D28D9", bg:"#EDE9FE", cat:"Operaciones",
+    metrics:[{v:"48",l:"Proyectos act."},{v:"87%",l:"A tiempo"},{v:"320",l:"Tareas/semana"},{v:"4.6★",l:"Satisfacción"}],
+    features:["Diagrama de Gantt","Gestión de tareas","Control de horas","Presupuesto de proyecto","Colaboración en equipo","Gestión de riesgos"],
+    icon:`<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 11l3 3L22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/></svg>`
+  },
+  {
+    id:7, name:"Soporte y Postventa",
+    short:"Atención al cliente y gestión de tickets",
+    desc:"Servicio al cliente excepcional con gestión de tickets multicanal, base de conocimiento inteligente, SLAs automatizados y métricas de satisfacción en tiempo real.",
+    color:"#0891B2", bg:"#ECFEFF", cat:"Soporte",
+    metrics:[{v:"2,107",l:"Tickets/mes"},{v:"4.8★",l:"CSAT"},{v:"1.4h",l:"Resolución"},{v:"94%",l:"SLA cumplido"}],
+    features:["Sistema de tickets","Chat en vivo","Base de conocimiento","SLA automatizado","Encuestas de satisfacción","Portal del cliente"],
+    icon:`<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 18v-6a9 9 0 0 1 18 0v6"/><path d="M21 19a2 2 0 0 1-2 2h-1a2 2 0 0 1-2-2v-3a2 2 0 0 1 2-2h3zM3 19a2 2 0 0 0 2 2h1a2 2 0 0 0 2-2v-3a2 2 0 0 0-2-2H3z"/></svg>`
+  },
+  {
+    id:8, name:"Analítica y Reportes",
+    short:"Business intelligence y dashboards en tiempo real",
+    desc:"Transforma datos en insights accionables con dashboards interactivos, reportes personalizados y análisis predictivo para tomar decisiones empresariales basadas en datos.",
+    color:"#EA580C", bg:"#FFF7ED", cat:"Analítica",
+    metrics:[{v:"142",l:"Dashboards"},{v:"8.3M",l:"Registros"},{v:"99.9%",l:"Uptime"},{v:"<2s",l:"Consulta"}],
+    features:["Dashboards interactivos","Reportes personalizados","KPIs en tiempo real","Análisis predictivo","Exportación de datos","Alertas inteligentes"],
+    icon:`<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg>`
+  },
+  {
+    id:9, name:"Comunicación Interna",
+    short:"Colaboración y mensajería para equipos",
+    desc:"Mejora la colaboración interna con mensajería instantánea, videollamadas integradas, gestión documental y espacios de trabajo colaborativos para todos los equipos.",
+    color:"#16A34A", bg:"#F0FDF4", cat:"Comunicación",
+    metrics:[{v:"1,240",l:"Usuarios"},{v:"48K",l:"Mensajes/día"},{v:"380",l:"Canales"},{v:"99%",l:"Disponibilidad"}],
+    features:["Chat en tiempo real","Videollamadas integradas","Compartir archivos","Canales por depto.","Notificaciones push","Directorio de empleados"],
+    icon:`<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>`
+  },
+  {
+    id:10, name:"Automatización / IA",
+    short:"Flujos de trabajo automáticos con inteligencia artificial",
+    desc:"Automatiza procesos repetitivos y aprovecha la inteligencia artificial para optimizar flujos de trabajo, reducir errores humanos y aumentar la eficiencia operacional de tu empresa.",
+    color:"#9333EA", bg:"#FAF5FF", cat:"Automatización",
+    metrics:[{v:"640+",l:"Flujos activos"},{v:"94%",l:"Tareas auto."},{v:"€120K",l:"Ahorro/mes"},{v:"0.2s",l:"Ejecución"}],
+    features:["Flujos de trabajo no-code","IA y machine learning","Integraciones API","Triggers automáticos","Procesamiento docs.","Bots inteligentes"],
+    icon:`<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg>`
+  }
+];
+
+const FEATURED_IDS = [1, 2, 3, 4, 5];
+
+const CATS = [
+  { name:"Todos los módulos", key:"Todos", color:"#555" },
+  { name:"Ventas",            key:"Ventas",         color:"#1264A3" },
+  { name:"Operaciones",       key:"Operaciones",    color:"#059669" },
+  { name:"Finanzas",          key:"Finanzas",       color:"#7C3AED" },
+  { name:"RRHH",              key:"RRHH",           color:"#DB2777" },
+  { name:"Soporte",           key:"Soporte",        color:"#0891B2" },
+  { name:"Analítica",         key:"Analítica",      color:"#EA580C" },
+  { name:"Comunicación",      key:"Comunicación",   color:"#16A34A" },
+  { name:"Automatización",    key:"Automatización", color:"#9333EA" }
+];
+
+/* ===== STATE ===== */
+let megaOpen       = false;
+let activeMegaCat  = "Todos";
+let activeProdCat  = "Todos";
+
+/* ===== HELPERS ===== */
+function svgInject(m, w, h) {
+  return m.icon.replace(
+    'stroke-width="2"',
+    `stroke-width="1.8" width="${w}" height="${h}" style="color:${m.color}"`
+  );
+}
+
+function arrowSVG() {
+  return `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" width="16" height="16">
+    <polyline points="9 18 15 12 9 6"/>
+  </svg>`;
+}
+
+/* ===== MEGA MENU ===== */
+function toggleMega() {
+  megaOpen = !megaOpen;
+  document.getElementById('mega-panel').classList.toggle('open', megaOpen);
+  document.getElementById('mega-backdrop').classList.toggle('open', megaOpen);
+  document.getElementById('btn-productos').classList.toggle('productos-active', megaOpen);
+}
+
+function closeMega() {
+  megaOpen = false;
+  document.getElementById('mega-panel').classList.remove('open');
+  document.getElementById('mega-backdrop').classList.remove('open');
+  document.getElementById('btn-productos').classList.remove('productos-active');
+}
+
+function renderMegaMenu() {
+  // Sidebar cats
+  const catsEl = document.getElementById('mega-cats');
+  catsEl.innerHTML = CATS.map(c => `
+    <div class="mega-cat ${c.key === activeMegaCat ? 'active' : ''}"
+         onclick="setMegaCat('${c.key}')">
+      <span class="mega-cat-dot" style="background:${c.color}"></span>
+      ${c.name}
+    </div>`).join('');
+
+  // Grid
+  const list = activeMegaCat === 'Todos'
+    ? MODULES
+    : MODULES.filter(m => m.cat === activeMegaCat);
+
+  const label = CATS.find(c => c.key === activeMegaCat)?.name || 'Todos los módulos';
+  document.getElementById('mega-content-label').textContent = label;
+
+  document.getElementById('mega-grid').innerHTML = list.map(m => `
+    <div class="mega-mod" onclick="openModule(${m.id}); closeMega();">
+      <div class="mm-icon" style="background:${m.bg}">${svgInject(m,18,18)}</div>
+      <div>
+        <div class="mm-name">${m.name}</div>
+        <div class="mm-sub">${m.short.split(' ').slice(0,4).join(' ')}…</div>
+      </div>
+    </div>`).join('');
+}
+
+function setMegaCat(key) {
+  activeMegaCat = key;
+  renderMegaMenu();
+}
+
+/* ===== HERO FEATURED CARD ===== */
+function renderFeaturedCard() {
+  const featured = MODULES.filter(m => FEATURED_IDS.includes(m.id));
+  document.getElementById('fc-items').innerHTML = featured.map(m => `
+    <div class="fc-item" onclick="openModule(${m.id})">
+      <div class="fc-icon" style="background:${m.bg}">${svgInject(m,22,22)}</div>
+      <div class="fc-text">
+        <div class="fc-name">${m.name}</div>
+        <div class="fc-desc">${m.short}</div>
+      </div>
+      <div class="fc-arrow">${arrowSVG()}</div>
+    </div>`).join('');
+}
+
+/* ===== HERO ILLUSTRATION DOTS ===== */
+function renderIllusDots() {
+  const el = document.getElementById('illus-dots');
+  if (!el) return;
+  el.innerHTML = MODULES.slice(0,6).map(m => `
+    <div class="illus-dot">
+      <span class="dot-circle" style="background:${m.color}"></span>
+      ${m.name.split(' ')[0]}
+    </div>`).join('');
+}
+
+/* ===== PRODUCTS PAGE ===== */
+function renderProductsSidebar() {
+  document.getElementById('psb-list').innerHTML = CATS.map(c => {
+    const n = c.key === 'Todos' ? MODULES.length : MODULES.filter(m => m.cat === c.key).length;
+    return `
+      <div class="psb-item ${c.key === activeProdCat ? 'active' : ''}"
+           onclick="setProdCat('${c.key}')">
+        <span class="psb-dot" style="background:${c.color}"></span>
+        ${c.name}
+      </div>`;
+  }).join('');
+}
+
+function renderProductsGrid(search = '') {
+  let list = MODULES;
+  if (activeProdCat !== 'Todos') list = list.filter(m => m.cat === activeProdCat);
+  if (search) {
+    const q = search.toLowerCase();
+    list = list.filter(m =>
+      m.name.toLowerCase().includes(q) ||
+      m.short.toLowerCase().includes(q) ||
+      m.desc.toLowerCase().includes(q)
+    );
+  }
+
+  const catLabel = CATS.find(c => c.key === activeProdCat)?.name || 'Todos los módulos';
+  document.getElementById('prod-section-name').textContent  = catLabel;
+  document.getElementById('prod-section-count').textContent = `${list.length} módulo${list.length !== 1 ? 's' : ''}`;
+
+  document.getElementById('prod-grid').innerHTML = list.map((m, i) => `
+    <div class="pcard" style="animation-delay:${i*.04}s" onclick="openModule(${m.id})">
+      <div class="pcard-icon" style="background:${m.bg}">${svgInject(m,23,23)}</div>
+      <div class="pcard-name">${m.name}</div>
+      <div class="pcard-desc">${m.short}. ${m.desc.split('.')[0]}.</div>
+      <div class="pcard-link" style="color:${m.color}"
+           onclick="event.stopPropagation(); openModule(${m.id})">
+        Más información
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" width="12" height="12">
+          <polyline points="9 18 15 12 9 6"/>
+        </svg>
+      </div>
+    </div>`).join('');
+}
+
+function setProdCat(key) {
+  activeProdCat = key;
+  renderProductsSidebar();
+  renderProductsGrid();
+}
+
+function filterProducts(val) {
+  renderProductsGrid(val);
+}
+
+/* ===== MODULE DETAIL ===== */
+function renderModule(id) {
+  const m = MODULES.find(x => x.id === id);
+  if (!m) return;
+
+  document.getElementById('mod-hero-section').style.background =
+    `linear-gradient(135deg, ${m.color}f0 0%, ${m.color}aa 100%)`;
+
+  document.getElementById('mod-bigicon').innerHTML = m.icon.replace(
+    'stroke-width="2"',
+    `stroke-width="1.5" width="32" height="32" style="color:white"`
+  );
+  document.getElementById('mod-title').textContent = m.name;
+  document.getElementById('mod-desc').textContent  = m.desc;
+
+  document.getElementById('mod-metrics').innerHTML = m.metrics.map(x => `
+    <div class="met-box">
+      <div class="met-val">${x.v}</div>
+      <div class="met-lbl">${x.l}</div>
+    </div>`).join('');
+
+  document.getElementById('feats-grid').innerHTML = m.features.map((f, i) => `
+    <div class="feat-card" style="animation-delay:${i*.05}s">
+      <div class="feat-card-icon" style="background:${m.bg}">
+        <svg viewBox="0 0 24 24" fill="none" stroke="${m.color}" stroke-width="2.5" width="18" height="18">
+          <polyline points="20 6 9 17 4 12"/>
+        </svg>
+      </div>
+      <h4>${f}</h4>
+      <p>Funcionalidad integrada del módulo ${m.name} de ERP Suite.</p>
+    </div>`).join('');
+}
+
+/* ===== NAVIGATION ===== */
+function showPage(name) {
+  ['home','products','module'].forEach(p => {
+    document.getElementById(`page-${p}`).style.display = 'none';
+  });
+  document.getElementById(`page-${name}`).style.display = 'block';
+  window.scrollTo({ top: 0, behavior: 'smooth' });
+  closeMega();
+}
+
+function goHome()     { showPage('home'); }
+function goProducts() {
+  activeProdCat = 'Todos';
+  renderProductsSidebar();
+  renderProductsGrid();
+  showPage('products');
+}
+
+function openModule(id) {
+  renderModule(id);
+  showPage('module');
+}
+
+/* ===== KEYBOARD ===== */
+document.addEventListener('keydown', e => { if (e.key === 'Escape') closeMega(); });
+
+/* ===== INIT ===== */
+renderMegaMenu();
+renderFeaturedCard();
+renderIllusDots();
+renderProductsSidebar();
+renderProductsGrid();
+</script>
+</body>
+</html>
